@@ -11,7 +11,7 @@ class ModelArgs(Tap):
     """
 
     depth: int = 3
-    """Number of message passing steps during a GCNN forward pass."""
+    """Number of message passing steps during a GCNN forward pass. Also defines number of hidden layers."""
 
     hidden_size: int = 300
     """Hidden layer size of node-level NNs."""
@@ -19,7 +19,7 @@ class ModelArgs(Tap):
     activation_function: Literal["ReLU"] = "ReLU"
     """Activation function for node-level NNs and readout FCNN."""
 
-    readout_depth: int = 3
+    readout_num_hidden_layers: int = 3
     """Number of layers in the readout FCNN."""
 
     readout_hidden_size: int = None
@@ -39,6 +39,9 @@ class ModelArgs(Tap):
 
     aggregation_method: Literal["mean", "sum"] = "mean"
     """Aggregation method during graph convolution."""
+
+    shared_node_level_nns: bool = False
+    """Whether node-level NNs should be shared across the depth of message passing or not."""
 
     def process_args(self) -> None:
         """

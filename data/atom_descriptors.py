@@ -130,7 +130,7 @@ def valence(a: Chem.rdchem.Atom) -> list[int]:
     """returns the valence of the atom"""
     explicit_valence = a.GetExplicitValence()
     implicit_valence = a.GetImplicitValence()
-    return [explicit_valence(a)[0] + implicit_valence(a)[0]]
+    return [explicit_valence + implicit_valence]
 
 
 def formal_charge(a: Chem.rdchem.Atom) -> list[bool]:
