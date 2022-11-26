@@ -5,10 +5,12 @@ from tap import Tap
 from data.atom_descriptors import all_descriptors
 
 
-class ModelArgs(Tap):
+class TrainArgs(Tap):
     """
-    Holds settings and parameters that define the GCNN model.
+    Holds settings and parameters required for training a model.
     """
+
+    # ~~~ Model Arguments ~~~
 
     depth: int = 3
     """Number of message passing steps during a GCNN forward pass. Also defines number of hidden layers."""
@@ -43,21 +45,7 @@ class ModelArgs(Tap):
     shared_node_level_nns: bool = False
     """Whether node-level NNs should be shared across the depth of message passing or not."""
 
-    def process_args(self) -> None:
-        """
-        Checks that argument choices are valid.
-        """
-        if not (self.node_level_dropout and self.readout_dropout) and self.dropout_probability != 0.0:
-            raise ValueError(
-                """User specified dropout probability, but dropout is disabled for both node-level NNs and
-                              the final readout FCNN."""
-            )
-
-
-class DataArgs(Tap):
-    """
-    Holds settings and parameters for data loading and featurization.
-    """
+    # ~~~ Data Arguments ~~~
 
     explicit_hydrogens: bool = False
     """Adds explicit hydrogens to the molecule being featurized if explicit hydrogens are not included in the molecule's
@@ -82,19 +70,30 @@ class DataArgs(Tap):
         """
         Checks that argument choices are valid.
         """
-        super(DataArgs, self).process_args()
+        super(TrainArgs, self).process_args()
 
-        # Ensure number of molecules matches the number of molecule smiles columns
-        if self.number_of_molecules != len(self.molecule_smiles_columns):
+        # Make sure dropout probability isn't erroneously set
+        if not (self.node_level_dropout and self.readout_dropout) and self.dropout_probability != 0.0:
             raise ValueError(
-                f"Number of molecules ({self.number_of_molecules}) does not match the number of molecule"
-                f"SMILES columns ({len(self.molecule_smiles_columns)})."
+                """User specified dropout probability, but dropout is disabled for both node-level NNs and
+                              the final readout FCNN."""
             )
 
-        # Ensure chosen descriptors are valid, or load all descriptors if using all
-        if self.atom_descriptors != ["all"]:
-            for descriptor in self.atom_descriptors:
-                if descriptor not in all_descriptors():
-                    raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
-        else:
-            self.atom_descriptors = all_descriptors().keys()
+        # Set readout hidden size if not dps
+        if not self.readout_hidden_size:
+            self.readout_hidden_size = self.hidden_size
+
+            # Ensure number of molecules matches the number of molecule smiles columns
+            if self.number_of_molecules != len(self.molecule_smiles_columns):
+                raise ValueError(
+                    f"Number of molecules ({self.number_of_molecules}) does not match the number of molecule"
+                    f"SMILES columns ({len(self.molecule_smiles_columns)})."
+                )
+
+            # Ensure chosen descriptors are valid, or load all descriptors if using all
+            if self.atom_descriptors != ["all"]:
+                for descriptor in self.atom_descriptors:
+                    if descriptor not in all_descriptors():
+                        raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
+            else:
+                self.atom_descriptors = all_descriptors().keys()

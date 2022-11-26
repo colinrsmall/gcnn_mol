@@ -20,7 +20,7 @@ CATEGORICAL_FEATURE_VAL_TO_IDX = {
     "atomic_number": [""] * MAX_ATOMIC_NUM,
     "degree": [0, 1, 2, 3, 4, 5],
     "formal_charge": [-1, -2, 1, 2, 0],
-    "num_Hs": [0, 1, 2, 3, 4],
+    "num_hydrogens": [0, 1, 2, 3, 4],
     "hybridization": [
         Chem.rdchem.HybridizationType.SP,
         Chem.rdchem.HybridizationType.SP2,
@@ -160,8 +160,8 @@ def num_hydrogens(a: Chem.rdchem.Atom) -> list[int]:
     num_explicit_hydrogens = a.GetNumExplicitHs()
     num_hydrogens = num_explicit_hydrogens + num_implicit_hydrogens
 
-    num_hydrogens_idx = CATEGORICAL_FEATURE_VAL_TO_IDX["num_Hs"].index(num_hydrogens)
-    possible_num_hydrogens_values = len(CATEGORICAL_FEATURE_VAL_TO_IDX["num_Hs"])
+    num_hydrogens_idx = CATEGORICAL_FEATURE_VAL_TO_IDX["num_hydrogens"].index(num_hydrogens)
+    possible_num_hydrogens_values = len(CATEGORICAL_FEATURE_VAL_TO_IDX["num_hydrogens"])
     num_hydrogens_vec = one_hot_encode(num_hydrogens_idx, possible_num_hydrogens_values)
 
     return num_hydrogens_vec
