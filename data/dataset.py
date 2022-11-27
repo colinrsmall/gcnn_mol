@@ -113,16 +113,21 @@ def load_dataset(train_args: TrainArgs) -> Dataset:
 
     datapoints = []
     print("Loading and featurizing molecules:")
+
+    bad_smiles_count = 0
     for _, row in tqdm(data.iterrows(), total=len(list(data.iterrows()))):
-        datapoints.extend(
-            [
-                featurizer.featurize_datapoint(
-                    row[train_args.molecule_smiles_columns],
-                    train_args.number_of_molecules,
-                    row[train_args.target_column],
-                )
-            ]
+        dp = featurizer.featurize_datapoint(
+            row[train_args.molecule_smiles_columns],
+            train_args.number_of_molecules,
+            row[train_args.target_column],
         )
+
+        if dp:
+            datapoints.extend([dp])
+        else:  # dp returned None, a SMILES string could not be parsed
+            bad_smiles_count += 1
+
+    print(f"Dataset loaded. {bad_smiles_count} SMILES strings could not be parsed.")
 
     return Dataset(
         train_args,
