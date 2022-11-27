@@ -40,6 +40,7 @@ class Dataset(data.Dataset):
         # Initialize scaler and stack each molecule datapoints' atom feature matrices into a single matrix
         scalers = [(StandardScaler() if f else None) for f in self.features_to_normalize]
         atom_features_stack = torch.vstack([torch.vstack(dp.atom_feature_matrices) for dp in self.datapoints])
+        print(f"Atom feature stack contains NaN: {np.isnan(atom_features_stack).any()}")
 
         # Fit each scaler
         for i, feature in enumerate(self.features_to_normalize):
@@ -72,6 +73,8 @@ class Dataset(data.Dataset):
                     feature_matrix[:, i] = torch.from_numpy(  # [-1, 1] but the feature matrix column is [-1]
                         scaler.transform(feature_matrix[:, i].reshape([-1, 1])).reshape([-1])
                     )
+                    if np.isn(feature_matrix[:, i]).any():
+                        print("Warning: datapoint contains NaN after scaling.")
 
         # Ensure the list of scalers matches the number of features to scale
         if len(scalers) != len(self.features_to_normalize):
