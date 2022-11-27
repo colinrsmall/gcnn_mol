@@ -39,8 +39,8 @@ class MoleculeFeaturizer:
         """
         try:
             mol = MolFromSmiles(smiles)
-        except TypeError:  # Molecule's SMILES string could not be parsed
-            return None
+        except TypeError as e:  # Molecule's SMILES string could not be parsed
+            raise e
 
         # Return None if the molecule's SMILES string could not be parsed
         if mol is None:
