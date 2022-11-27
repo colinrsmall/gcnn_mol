@@ -40,7 +40,6 @@ class GCNN(nn.Module):
         readout_input_size = (
             train_args.hidden_size * number_of_molecules + mol_feature_vector_length * number_of_molecules
         )
-
         self.readout_input_layer = nn.Linear(readout_input_size, train_args.readout_hidden_size, train_args.bias)
 
         for depth in range(train_args.readout_num_hidden_layers):
@@ -53,7 +52,7 @@ class GCNN(nn.Module):
         # Set dropout layer if using
         if train_args.node_level_dropout or train_args.readout_dropout:
             if train_args.dropout_probability != 0.0:
-                self.dropout = nn.Dropout(train_args.readout_dropout)
+                self.dropout = nn.Dropout(train_args.dropout_probability)
             else:
                 self.dropout = nn.Dropout()
 
@@ -95,7 +94,7 @@ class GCNN(nn.Module):
 
                 # Dropout
                 if self.train_args.node_level_dropout:
-                    lr_helper = self.dropout(self.train_args.dropout_probability)
+                    lr_helper = self.dropout(lr_helper)
 
             # Readout aggregation. Only sun for now.
             # TODO: Implement several readout aggregation methods
@@ -128,6 +127,10 @@ class GCNN(nn.Module):
 
         for depth in range(self.train_args.readout_num_hidden_layers):
             latent_representation = self.readout_hidden_nns[depth](latent_representation)
+
+            # TODO: Using readout dropout leads to NN outputting NaN, fix this
+            # if self.train_args.readout_dropout:
+            #     latent_representation = self.dropout(latent_representation)
 
         output = self.readout_output_layer(latent_representation)
 

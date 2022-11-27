@@ -1,9 +1,23 @@
 import numpy as np
 from typing import Union
 import torch
+from abc import ABC, abstractmethod
 
 
-class SingleMolDatapoint:
+class AbstractDatapoint(ABC):
+    """
+    Abstract class representing a datapoint. Used internally for typing purposes.
+    """
+
+    def __init__(self, target: torch.float32):
+        self.target = target
+
+    @abstractmethod
+    def to(self, device: torch.device):
+        pass
+
+
+class SingleMolDatapoint(AbstractDatapoint):
     """
     Defines a single molecule datapoint. Contains a molecule's SMILES string, adjacency matrix, atom feature matrix,
     molecular features, and target to learn on.
@@ -15,8 +29,9 @@ class SingleMolDatapoint:
         adjacency_matrix: torch.Tensor,
         atom_feature_matrix: torch.Tensor,
         molecule_features_vector: torch.Tensor,
-        target: torch.float32 = None,
+        target: torch.float32,
     ):
+        super().__init__(target)
         self.smiles = smiles
         self.adjacency_matrix = adjacency_matrix
         self.atom_feature_matrix = atom_feature_matrix
@@ -30,7 +45,7 @@ class SingleMolDatapoint:
         # self.target.to(device)
 
 
-class MultiMolDatapoint:
+class MultiMolDatapoint(AbstractDatapoint):
     """
     Defines a multi-molecule datapoint. Contains SMILES strings, adjacency matrices, atom feature matrices,
     and molecular features for each molecule in the datapoint, and contains the target to learn on.
@@ -42,8 +57,9 @@ class MultiMolDatapoint:
         adjacency_matrices: list[torch.Tensor],
         atom_feature_matrices: list[torch.Tensor],
         molecule_feature_vectors: list[torch.Tensor],
-        target: torch.float32 = None,
+        target: torch.float32,
     ):
+        super().__init__(target)
         self.smiles_list = smiles_list
         self.adjacency_matrices = adjacency_matrices
         self.atom_feature_matrices = atom_feature_matrices

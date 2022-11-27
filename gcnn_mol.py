@@ -7,6 +7,7 @@ from model import gcnn
 from torch import nn
 from tqdm.auto import tqdm
 
+from scipy.stats import kendalltau, spearmanr
 import torch
 import torch.optim as optim
 
@@ -17,8 +18,11 @@ if __name__ == "__main__":
     dataset = load_dataset(train_args)
     dataset.to(device)
 
-    scalers = dataset.fit_scalers_to_features()
-    dataset.normalize_features(scalers)
+    feature_scalers = dataset.fit_scalers_to_features()
+    dataset.normalize_features(feature_scalers)
+
+    # target_scaler = dataset.fit_scalers_to_target()
+    # dataset.normalize_targets(target_scaler)
 
     m = gcnn.GCNN(
         train_args,
@@ -32,8 +36,15 @@ if __name__ == "__main__":
 
     pbar = tqdm(range(100))
 
+    # dataset targets, used for computing kendall's tau
+    targets = [dp.target for dp in dataset]
+
     for epoch in pbar:
         running_loss = 0.0
+
+        # save model outputs, used for computing kendall's tau
+        outputs = []
+
         for i, datapoint in enumerate(dataset.datapoints):
             target = datapoint.target
 
@@ -41,6 +52,7 @@ if __name__ == "__main__":
             optimizer.zero_grad()
 
             output = m.forward(datapoint)
+            outputs.append(output.detach().numpy())
 
             loss = criterion(output, torch.Tensor([target]))
             loss.backward()
@@ -49,4 +61,6 @@ if __name__ == "__main__":
 
             optimizer.step()
 
-        pbar.set_description(f"Running loss: {running_loss}")
+        tau = kendalltau(targets, outputs)
+        spearman = spearmanr(targets, outputs)
+        pbar.set_description(f"Running loss: {running_loss}; Kendall's Tau: {tau}; Spearman: {spearman}")
