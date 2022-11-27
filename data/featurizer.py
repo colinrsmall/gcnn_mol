@@ -37,7 +37,10 @@ class MoleculeFeaturizer:
         :param smiles: The SMILES string of a molecule to featurize.
         :return: A MolData object containing the adjacency matrix and features matrix.
         """
-        mol = MolFromSmiles(smiles)
+        try:
+            mol = MolFromSmiles(smiles)
+        except TypeError:  # Molecule's SMILES string could not be parsed
+            return None
 
         # Return None if the molecule's SMILES string could not be parsed
         if mol is None:
