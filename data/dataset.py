@@ -73,7 +73,7 @@ class Dataset(data.Dataset):
                     feature_matrix[:, i] = torch.from_numpy(  # [-1, 1] but the feature matrix column is [-1]
                         scaler.transform(feature_matrix[:, i].reshape([-1, 1])).reshape([-1])
                     )
-                    if np.isin(feature_matrix[:, i]).any():
+                    if np.isnan(feature_matrix[:, i]).any():
                         print("Warning: datapoint contains NaN after scaling.")
 
         # Ensure the list of scalers matches the number of features to scale
