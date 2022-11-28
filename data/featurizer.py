@@ -51,9 +51,9 @@ class MoleculeFeaturizer:
 
         # Check for improper adjacency matrices
         if 0 in np.sum(adjacency_matrix, axis=1):
-            print(
-                f"Adjacency matrix for {smiles} contains a 0, suggesting the SMILES string could not be parsed correctly."
-            )
+            # Molecule likely has a disconnected structure (denoted by a "." in its SMILES string)
+            # A proper adjacency matrix for this molecule cannot be created because of this, so we exclude
+            # this molecule.
             return None
 
         # Add self-connections to the adjacency matrix

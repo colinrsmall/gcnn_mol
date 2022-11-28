@@ -46,7 +46,9 @@ if __name__ == "__main__":
         # save model outputs, used for computing kendall's tau
         outputs = []
 
-        for i, datapoint in tqdm(enumerate(dataset.datapoints), desc="Datapoints:", leave=False):
+        for i, datapoint in tqdm(
+            enumerate(dataset.datapoints), desc="Datapoints:", leave=False, total=len(dataset.datapoints)
+        ):
             target = datapoint.target
 
             # zero the parameter gradients
@@ -62,6 +64,9 @@ if __name__ == "__main__":
 
             optimizer.step()
 
+        avg_loss = running_loss / len(dataset.datapoints)
         tau = kendalltau(targets, outputs)
         spearman = spearmanr(targets, outputs)
-        pbar.set_description(f"Running loss: {running_loss}; Kendall's Tau: {tau}; Spearman: {spearman}")
+        pbar.set_description(
+            f"Running loss: {running_loss}; Avg. Loss: {avg_loss}; Kendall's Tau: {tau.correlation}; Spearman: {spearman.correlation}"
+        )
