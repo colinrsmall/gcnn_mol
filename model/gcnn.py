@@ -84,10 +84,20 @@ class GCNN(nn.Module):
                 # Aggregation
                 match self.train_args.aggregation_method:
                     case "mean":
-                        lr_helper = (torch.mm(adjacency_matrix, lr_helper).T / torch.sum(adjacency_matrix, dim=1)).T
+                        # lr_helper = (torch.mm(adjacency_matrix, lr_helper).T / torch.sum(adjacency_matrix, dim=1)).T
+
                         # testing code, delete later
-                        if torch.isnan(lr_helper).any():
-                            raise ValueError("Warning: datapoint contains NaN after aggregation.")
+                        a = torch.mm(adjacency_matrix, lr_helper).T
+                        b = torch.sum(adjacency_matrix, dim=1)
+                        c = (a / b).T
+
+                        if torch.isnan(a).any():
+                            raise ValueError(f"Warning: a contains NaN after aggregation. Depth: {depth}")
+                        if torch.isnan(b).any():
+                            raise ValueError(f"Warning: b contains NaN after aggregation. Depth: {depth}")
+                        if torch.isnan(c).any():
+                            raise ValueError(f"Warning: a contains NaN after aggregation. Depth: {depth}")
+
                     case "sum":
                         lr_helper = torch.mm(adjacency_matrix, lr_helper)
                     case x:
