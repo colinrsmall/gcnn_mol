@@ -46,7 +46,7 @@ if __name__ == "__main__":
         # save model outputs, used for computing kendall's tau
         outputs = []
 
-        for i, datapoint in tqdm(enumerate(dataset.datapoints), desc="Datapoints:", leave=False):
+        for i, datapoint in tqdm(enumerate(dataset.datapoints), desc="Datapoints:"):
             target = datapoint.target
 
             # zero the parameter gradients
