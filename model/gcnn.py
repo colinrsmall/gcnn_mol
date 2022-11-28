@@ -71,13 +71,13 @@ class GCNN(nn.Module):
             :param atom_feature_matrix:
             :return:
             """
-            # testing code, delete later
-            if torch.isnan(atom_feature_matrix).any():
-                print("Warning: datapoint contains NaN before passing through model.")
 
             # Input
             # lr_helper = latent representation of helper function
             lr_helper = self.input_node_level_nn(atom_feature_matrix)
+            # testing code, delete later
+            if torch.isnan(lr_helper).any():
+                raise ValueError("Warning: datapoint contains NaN after node-level layer.")
 
             # Message passing
             for depth in range(self.train_args.depth):
@@ -85,6 +85,9 @@ class GCNN(nn.Module):
                 match self.train_args.aggregation_method:
                     case "mean":
                         lr_helper = (torch.mm(adjacency_matrix, lr_helper).T / torch.sum(adjacency_matrix, dim=1)).T
+                        # testing code, delete later
+                        if torch.isnan(lr_helper).any():
+                            raise ValueError("Warning: datapoint contains NaN after aggregation.")
                     case "sum":
                         lr_helper = torch.mm(adjacency_matrix, lr_helper)
                     case x:
@@ -92,21 +95,36 @@ class GCNN(nn.Module):
 
                 # Update
                 lr_helper = self.node_level_nns[depth](lr_helper)
+                # testing code, delete later
+                if torch.isnan(lr_helper).any():
+                    raise ValueError("Warning: datapoint contains NaN after update.")
 
                 # Activation
                 lr_helper = self.activation_function(lr_helper)
+                # testing code, delete later
+                if torch.isnan(lr_helper).any():
+                    raise ValueError("Warning: datapoint contains NaN after activation.")
 
                 # Dropout
                 if self.train_args.node_level_dropout:
                     lr_helper = self.dropout(lr_helper)
+                    # testing code, delete later
+                    if torch.isnan(lr_helper).any():
+                        raise ValueError("Warning: datapoint contains NaN after dropout.")
 
             # Readout aggregation. Only sun for now.
             # TODO: Implement several readout aggregation methods
             # TODO: See list at: https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html
             lr_helper = torch.sum(lr_helper, dim=0)
+            # testing code, delete later
+            if torch.isnan(lr_helper).any():
+                raise ValueError("Warning: datapoint contains NaN after readout aggregation.")
 
             # Concatenate molecule features to latent representation
             lr_helper = torch.cat((lr_helper, mol_features))
+            # testing code, delete later
+            if torch.isnan(lr_helper).any():
+                raise ValueError("Warning: datapoint contains NaN after concatenation.")
 
             return lr_helper
 
@@ -128,14 +146,23 @@ class GCNN(nn.Module):
 
         # Readout
         latent_representation = self.readout_input_layer(latent_representation)
+        # testing code, delete later
+        if torch.isnan(latent_representation).any():
+            raise ValueError("Warning: datapoint contains NaN after readout input layer.")
 
         for depth in range(self.train_args.readout_num_hidden_layers):
             latent_representation = self.readout_hidden_nns[depth](latent_representation)
+            # testing code, delete later
+            if torch.isnan(latent_representation).any():
+                raise ValueError(f"Warning: datapoint contains NaN after readout hidden layer {depth}.")
 
             # TODO: Using readout dropout leads to NN outputting NaN, fix this
             # if self.train_args.readout_dropout:
             #     latent_representation = self.dropout(latent_representation)
 
         output = self.readout_output_layer(latent_representation)
+        # testing code, delete later
+        if torch.isnan(output).any():
+            raise ValueError("Warning: datapoint contains NaN after readout output later.")
 
         return output
