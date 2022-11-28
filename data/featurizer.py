@@ -48,6 +48,18 @@ class MoleculeFeaturizer:
 
         # Generate adjacency matrix
         adjacency_matrix = GetAdjacencyMatrix(mol)
+
+        # Check for improper adjacency matrices
+        if 0 in np.sum(adjacency_matrix, axis=1):
+            print(
+                f"Adjacency matrix for {smiles} contains a 0, suggesting the SMILES string could not be parsed correctly."
+            )
+            return None
+
+        # Add self-connections to the adjacency matrix
+        np.fill_diagonal(adjacency_matrix, 1)
+
+        # Turn adjacency matrix into a torch.Tensor
         adjacency_matrix = torch.from_numpy(adjacency_matrix).to(torch.float32)
 
         # Generate atom features
