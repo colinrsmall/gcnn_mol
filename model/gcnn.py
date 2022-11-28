@@ -71,6 +71,10 @@ class GCNN(nn.Module):
             :param atom_feature_matrix:
             :return:
             """
+            # testing code, delete later
+            if torch.isnan(atom_feature_matrix).any():
+                print("Warning: datapoint contains NaN before passing through model.")
+
             # Input
             # lr_helper = latent representation of helper function
             lr_helper = self.input_node_level_nn(atom_feature_matrix)

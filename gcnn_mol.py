@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from model import gcnn
 from torch import nn
 from tqdm.auto import tqdm
+import numpy as np
 
 from scipy.stats import kendalltau, spearmanr
 import torch
@@ -53,6 +54,9 @@ if __name__ == "__main__":
 
             output = m.forward(datapoint)
             outputs.append(output.detach().numpy())
+
+            if torch.isnan(output).any():
+                print("Warning: datapoint contains NaN after passing through model.")
 
             loss = criterion(output, torch.Tensor([target]))
             loss.backward()
