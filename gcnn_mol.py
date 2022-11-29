@@ -44,18 +44,15 @@ if __name__ == "__main__":
 
     pbar = tqdm(range(100))
 
-    # dataset targets, used for computing kendall's tau
-    targets = [dp.target for dp in dataset]
+    train_set, test_set = dataset.train_test_split(0.2)
 
     for epoch in pbar:
-        running_loss = 0.0
+        training_loss = 0.0
 
         # save model outputs, used for computing kendall's tau
         outputs = []
 
-        for i, datapoint in tqdm(
-            enumerate(dataset.datapoints), desc="Datapoints:", leave=False, total=len(dataset.datapoints)
-        ):
+        for i, datapoint in tqdm(enumerate(train_set), desc="Train set:", leave=False, total=len(train_set)):
             target = datapoint.target
 
             # zero the parameter gradients
@@ -67,13 +64,26 @@ if __name__ == "__main__":
             loss = criterion(output, torch.Tensor([target]))
             loss.backward()
 
-            running_loss += loss.item()
+            training_loss += loss.item()
 
             optimizer.step()
 
-        avg_loss = running_loss / len(dataset.datapoints)
-        tau = kendalltau(targets, outputs)
-        spearman = spearmanr(targets, outputs)
+        test_loss = 0
+        test_outputs = []
+        test_targets = [dp.target for dp in test_set]
+
+        for datapoint in tqdm(test_set, desc="Test set:", leave=False, total=len(test_set)):
+            target = datapoint.target
+            output = m.forward(datapoint)
+            test_outputs.append(output.detach().numpy())
+
+            loss = criterion(output, torch.Tensor([target]))
+            test_loss += loss.item()
+
+        avg_loss = test_loss / len(test_set)
+        tau = kendalltau(test_targets, test_outputs)
+        spearman = spearmanr(test_targets, test_outputs)
+
         pbar.set_description(
-            f"Running loss: {running_loss}; Avg. Loss: {avg_loss}; Kendall's Tau: {tau.correlation}; Spearman: {spearman.correlation}"
+            f"Test set: Avg. Loss: {avg_loss}; Kendall's Tau: {tau.correlation}; Spearman: {spearman.correlation}"
         )

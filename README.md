@@ -13,7 +13,7 @@ pairs of antibiotics.
 - [x] ~~Generate molecular features~~ Done 11/29
 - [ ] Move training code to train.py
 - [ ] Incorporate logging with Neptune
-- [ ] Training/test split during training
+- [x] ~~Training/test split during training~~ Done 11/29
 - [ ] Implement automated hyperparameter optimization
 - [ ] Fix target value normalization
 - [ ] Create predict.py script to run

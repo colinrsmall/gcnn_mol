@@ -1,16 +1,19 @@
-import numpy as np
-
-from data.moldata import SingleMolDatapoint, MultiMolDatapoint, AbstractDatapoint
-from args import TrainArgs
+import random
 from typing import Union
-from data.featurizer import MoleculeFeaturizer
+
+import numpy as np
 import pandas as pd
-from data.atom_descriptors import get_features_vector_length, get_features_to_normalize
-from tqdm.auto import tqdm
-from torch.utils import data
 import torch
-from sklearn.preprocessing import StandardScaler
 from rdkit import Chem
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from torch.utils import data
+from tqdm.auto import tqdm
+
+from args import TrainArgs
+from data.atom_descriptors import get_features_to_normalize, get_features_vector_length
+from data.featurizer import MoleculeFeaturizer
+from data.moldata import AbstractDatapoint, MultiMolDatapoint, SingleMolDatapoint
 
 
 class Dataset(data.Dataset):
@@ -108,6 +111,16 @@ class Dataset(data.Dataset):
 
     def __getitem__(self, idx) -> AbstractDatapoint:
         return self.datapoints[idx]
+
+    def train_test_split(self, test_split_percentage) -> (list[torch.Tensor], list[torch.Tensor]):
+        """
+        Splits the dataset into two parts, a training split of size len(dataset)*(1-test_split_percentage) and a
+        test split of size len(dataset)*(test_split_percentage). Randomly assigns datapoints to each split.
+        :param test_split_percentage: The size of the test split as a percentage of the total size of the dataset.
+        :return: Two lists of datapoints corresponding to the training split and test split.
+        """
+        train_set, test_set = train_test_split(self.datapoints, test_size=test_split_percentage)
+        return train_set, test_set
 
 
 def load_dataset(train_args: TrainArgs) -> Dataset:
