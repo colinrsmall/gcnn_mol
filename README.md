@@ -10,7 +10,7 @@ pairs of antibiotics.
 
 ## TODO:
 
-- [ ] Generate molecular features
+- [x] ~~Generate molecular features~~ Done 11/29
 - [ ] Move training code to train.py
 - [ ] Incorporate logging with Neptune
 - [ ] Training/test split during training
@@ -32,7 +32,10 @@ pairs of antibiotics.
 - [ ] Motif/subgraph attention
 - [ ] Co-attention
 - [ ] Motif/subgraph co-attention
+- [ ] Add optimizers to arguments (Adam, SGD, etc.)
 
 Nice to have:
 
 - [ ] Clean up data normalization code
+- [ ] Jumping Knowledge Network: https://arxiv.org/abs/1806.03536
+- [ ] Self-attention graph pooling: https://arxiv.org/abs/1904.08082

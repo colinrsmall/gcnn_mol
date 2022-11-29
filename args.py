@@ -2,7 +2,7 @@ from typing import Literal
 
 from tap import Tap
 
-from data.atom_descriptors import all_descriptors
+from data import atom_descriptors, molecule_descriptors
 
 
 class TrainArgs(Tap):
@@ -54,6 +54,9 @@ class TrainArgs(Tap):
     atom_descriptors: list[str] = ["all"]
     """Determines which atom descriptors will be used when featurizing a molecule."""
 
+    molecule_descriptors: list[str] = ["all"]
+    """Determines which molecule descriptors will be used when featurizing a molecule."""
+
     dataset_path: str
     """Points to the dataset to be loaded."""
 
@@ -90,10 +93,18 @@ class TrainArgs(Tap):
                     f"SMILES columns ({len(self.molecule_smiles_columns)})."
                 )
 
-            # Ensure chosen descriptors are valid, or load all descriptors if using all
+            # Ensure chosen atom descriptors are valid, or load all descriptors if using all
             if self.atom_descriptors != ["all"]:
                 for descriptor in self.atom_descriptors:
-                    if descriptor not in all_descriptors():
+                    if descriptor not in atom_descriptors.all_descriptors():
                         raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
             else:
-                self.atom_descriptors = all_descriptors().keys()
+                self.atom_descriptors = atom_descriptors.all_descriptors().keys()
+
+            # Ensure chosen molecule descriptors are valid, or load all descriptors if using all
+            if self.molecule_descriptors != ["all"]:
+                for descriptor in self.molecule_descriptors:
+                    if descriptor not in molecule_descriptors.all_descriptors():
+                        raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
+            else:
+                self.molecule_descriptors = molecule_descriptors.all_descriptors().keys()

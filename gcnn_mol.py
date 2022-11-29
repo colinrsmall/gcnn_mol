@@ -27,9 +27,9 @@ if __name__ == "__main__":
 
     m = gcnn.GCNN(
         train_args,
-        dataset.atom_feature_vector_length,
+        dataset.atom_features_vector_length,
         train_args.number_of_molecules,
-        dataset.mol_feature_vector_length,
+        dataset.mol_features_vector_length,
     )
 
     optimizer = optim.SGD(m.parameters(), lr=0.001, momentum=0.9)

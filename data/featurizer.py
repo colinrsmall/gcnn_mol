@@ -5,7 +5,7 @@ from rdkit.Chem.rdchem import Atom, Mol
 from rdkit.Chem import GetAdjacencyMatrix
 from rdkit.Chem import MolToSmiles, MolFromSmiles
 
-from data import atom_descriptors
+from data import atom_descriptors, molecule_descriptors
 from args import TrainArgs
 from data.moldata import SingleMolDatapoint, MultiMolDatapoint
 
@@ -16,16 +16,33 @@ class MoleculeFeaturizer:
     def __init__(self, args: TrainArgs):
         self.data_args = args
 
+        # Compute atom and mol feature vectors length by featurizing dummy atom and mol
+        mol = MolFromSmiles("CC")
+        self.atom_features_vector_length = len(self.create_descriptors_for_atom(mol.GetAtoms()[0]))
+
     def create_descriptors_for_atom(self, atom: Atom) -> (np.ndarray, np.ndarray):
         """
         Creates descriptor feature vector for a given atom using the descriptors provided in the featurizer's
         featurization args.
         :param atom: An atom to create descriptor features for.
-        :return: An np.ndarray containing the descriptor features for the atom
+        :return: An np.ndarray containing the descriptor features for the atom.
         """
         feature_vector = []
         for descriptor in self.data_args.atom_descriptors:
             features = atom_descriptors.all_descriptors()[descriptor](atom)
+            feature_vector.extend(features)
+        return np.array(feature_vector)
+
+    def create_descriptors_for_molecule(self, mol: Mol) -> (np.ndarray, np.ndarray):
+        """
+        Creates descriptor feature vector for a given molecule using the descriptors provided in the featurizer's
+        featurization args.
+        :param mol: An rdkit molecule to create descriptor features for.
+        :return: An np.ndarray containing the descriptor features for the molecule.
+        """
+        feature_vector = []
+        for descriptor in self.data_args.molecule_descriptors:
+            features = molecule_descriptors.all_descriptors()[descriptor](mol)
             feature_vector.extend(features)
         return np.array(feature_vector)
 
@@ -63,19 +80,14 @@ class MoleculeFeaturizer:
         adjacency_matrix = torch.from_numpy(adjacency_matrix).to(torch.float32)
 
         # Generate atom features
-        # features_vector_length = atom_descriptors.get_features_vector_length(self.data_args.atom_descriptors)
-        # Compute feature vector length by featurizing dummy atom
-        features_vector_length = len(self.create_descriptors_for_atom(mol.GetAtoms()[0]))
-
-        atom_feature_matrix = np.zeros((len(adjacency_matrix), features_vector_length))
+        atom_feature_matrix = np.zeros((len(adjacency_matrix), self.atom_features_vector_length))
         atom_feature_matrix = torch.from_numpy(atom_feature_matrix).to(torch.float32)
 
         for atom in mol.GetAtoms():
             atom_feature_matrix[atom.GetIdx()] = torch.from_numpy(self.create_descriptors_for_atom(atom))
 
         # Generate molecule features
-        # TODO: Implement, call from data.molecule_descriptors
-        mol_features = torch.from_numpy(np.zeros(1)).to(torch.float32)
+        mol_features = torch.from_numpy(self.create_descriptors_for_molecule(mol)).to(torch.float32)
 
         return smiles, adjacency_matrix, atom_feature_matrix, mol_features
 

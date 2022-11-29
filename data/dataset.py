@@ -10,6 +10,7 @@ from tqdm.auto import tqdm
 from torch.utils import data
 import torch
 from sklearn.preprocessing import StandardScaler
+from rdkit import Chem
 
 
 class Dataset(data.Dataset):
@@ -18,17 +19,19 @@ class Dataset(data.Dataset):
         self,
         train_args: TrainArgs,
         datapoints: list[Union[SingleMolDatapoint, MultiMolDatapoint]],
-        atom_feature_vector_length: int,
-        mol_feature_vector_length: int,
         features_to_normalize: list[bool],
         num_molecules_per_datapoint: int,
     ):
         self.data_args = train_args
         self.datapoints = datapoints
-        self.atom_feature_vector_length = atom_feature_vector_length
-        self.mol_feature_vector_length = mol_feature_vector_length
         self.features_to_normalize = features_to_normalize
         self.num_molecules_per_datapoint = num_molecules_per_datapoint
+
+        # Compute atom and mol feature vectors length by featurizing dummy atom and mol
+        featurizer = MoleculeFeaturizer(train_args)
+        mol = Chem.MolFromSmiles("CC")
+        self.atom_features_vector_length = len(featurizer.create_descriptors_for_atom(mol.GetAtoms()[0]))
+        self.mol_features_vector_length = len(featurizer.create_descriptors_for_molecule(mol))
 
     def fit_scalers_to_features(self) -> list[StandardScaler]:
         """
@@ -131,8 +134,6 @@ def load_dataset(train_args: TrainArgs) -> Dataset:
     return Dataset(
         train_args,
         datapoints,
-        get_features_vector_length(train_args.atom_descriptors),
-        1,
         get_features_to_normalize(train_args.atom_descriptors),
         train_args.number_of_molecules,
     )
