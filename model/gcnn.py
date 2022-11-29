@@ -10,6 +10,59 @@ from data.dataset import Dataset
 from data.moldata import MultiMolDatapoint, SingleMolDatapoint
 
 
+class FCNNOnly(nn.Module):
+    def __init__(self, train_args: TrainArgs, mol_feature_vector_length: int, number_of_molecules: int):
+        super().__init__()
+
+        self.train_args = train_args
+        self.mol_feature_vector_length = mol_feature_vector_length
+        self.number_of_molecules = number_of_molecules
+
+        # Build readout layer
+        self.readout_hidden_nns = []
+
+        readout_input_size = mol_feature_vector_length * number_of_molecules
+        self.readout_input_layer = nn.Linear(readout_input_size, train_args.readout_hidden_size, train_args.bias)
+
+        for depth in range(train_args.readout_num_hidden_layers):
+            self.readout_hidden_nns.append(
+                nn.Linear(train_args.readout_hidden_size, train_args.readout_hidden_size, train_args.bias)
+            )
+
+        self.readout_output_layer = nn.Linear(train_args.readout_hidden_size, 1, train_args.bias)
+
+        # Set dropout layer if using
+        if train_args.node_level_dropout or train_args.readout_dropout:
+            if train_args.dropout_probability != 0.0:
+                self.dropout = nn.Dropout(train_args.dropout_probability)
+            else:
+                self.dropout = nn.Dropout()
+
+        # Set activation function
+        match train_args.activation_function:
+            case "ReLU":
+                self.activation_function = nn.ReLU()
+            case _:
+                raise ValueError(f"{self.activation}")
+
+    def forward(self, datapoint: Union[SingleMolDatapoint, MultiMolDatapoint]):
+        # Load and concat molecule features, if needed
+        if self.number_of_molecules == 1:
+            mol_features = datapoint.molecule_features_vector
+        else:
+            mol_features = torch.concat(datapoint.molecule_feature_vectors)
+
+        # FNN
+        latent_representation = self.readout_input_layer(mol_features)
+
+        for depth in range(self.train_args.depth):
+            latent_representation = self.readout_hidden_nns[depth](latent_representation)
+
+        output = self.readout_output_layer(latent_representation)
+
+        return output
+
+
 class GCNN(nn.Module):
     def __init__(
         self,
@@ -66,7 +119,7 @@ class GCNN(nn.Module):
     def forward(self, datapoint: Union[SingleMolDatapoint, MultiMolDatapoint]):
         def forward_helper(adjacency_matrix: Tensor, atom_feature_matrix: Tensor, mol_features: Tensor) -> Tensor:
             """
-            Helper function for
+            Helper function for a forward pass of the NN.
             :param adjacency_matrix:
             :param atom_feature_matrix:
             :return:

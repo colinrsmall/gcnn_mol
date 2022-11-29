@@ -25,12 +25,19 @@ if __name__ == "__main__":
     # target_scaler = dataset.fit_scalers_to_target()
     # dataset.normalize_targets(target_scaler)
 
-    m = gcnn.GCNN(
-        train_args,
-        dataset.atom_features_vector_length,
-        train_args.number_of_molecules,
-        dataset.mol_features_vector_length,
-    )
+    if train_args.mol_features_only:
+        m = gcnn.FCNNOnly(
+            train_args,
+            dataset.mol_features_vector_length,
+            train_args.number_of_molecules,
+        )
+    else:
+        m = gcnn.GCNN(
+            train_args,
+            dataset.atom_features_vector_length,
+            train_args.number_of_molecules,
+            dataset.mol_features_vector_length,
+        )
 
     optimizer = optim.SGD(m.parameters(), lr=0.001, momentum=0.9)
     criterion = nn.MSELoss()

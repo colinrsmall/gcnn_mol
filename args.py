@@ -45,6 +45,10 @@ class TrainArgs(Tap):
     shared_node_level_nns: bool = False
     """Whether node-level NNs should be shared across the depth of message passing or not."""
 
+    mol_features_only: bool = False
+    """Whether the model should use molecule features only. If true, the model will not use graph convolution and will
+       only feed molecule features through the readout fully connected NN."""
+
     # ~~~ Data Arguments ~~~
 
     explicit_hydrogens: bool = False
