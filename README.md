@@ -11,11 +11,11 @@ pairs of antibiotics.
 ## TODO:
 
 - [x] ~~Generate molecular features~~ Done 11/29
-- [ ] Move training code to train.py
-- [ ] Incorporate logging with Neptune
+- [x] ~~Move training code to train.py~~ Done 11/29
+- [x] ~~Incorporate logging with Neptune~~ Done 11/30 - Using wandb instead
 - [x] ~~Training/test split during training~~ Done 11/29
 - [ ] Implement automated hyperparameter optimization
-- [ ] Fix target value normalization
+- [x] ~~Fix target value normalization~~ Done 11/29 - Decided not to implement target scaling
 - [ ] Create predict.py script to run
 - [ ] Implement more activation functions:
   - [ ] PReLu

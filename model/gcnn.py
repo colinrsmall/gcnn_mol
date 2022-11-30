@@ -1,12 +1,10 @@
 from typing import Union
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torch import Tensor
 
-from args import TrainArgs
-from data.dataset import Dataset
+from utils.args import TrainArgs
 from data.moldata import MultiMolDatapoint, SingleMolDatapoint
 
 

@@ -1,7 +1,5 @@
-import random
 from typing import Union
 
-import numpy as np
 import pandas as pd
 import torch
 from rdkit import Chem
@@ -10,8 +8,8 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils import data
 from tqdm.auto import tqdm
 
-from args import TrainArgs
-from data.atom_descriptors import get_features_to_normalize, get_features_vector_length
+from utils.args import TrainArgs
+from data.atom_descriptors import get_features_to_normalize
 from data.featurizer import MoleculeFeaturizer
 from data.moldata import AbstractDatapoint, MultiMolDatapoint, SingleMolDatapoint
 
@@ -55,16 +53,6 @@ class Dataset(data.Dataset):
 
         return scalers
 
-    # def fit_scalers_to_target(self) -> StandardScaler:
-    #     """
-    #     Fits a single scaler to the targets of the dataset.
-    #     :return: An sklearn StandardScaler fit to the targets of the dataset.
-    #     """
-    #     scaler = StandardScaler()
-    #     mol_target_stack = np.array([dp.target for dp in self.datapoints])
-    #     scaler.fit(mol_target_stack.reshape(-1, 1))
-    #     return scaler
-
     def normalize_features(self, scalers: list[StandardScaler]) -> None:
         """
         Normalize the features of the dataset in place using a provided list of scalers.
@@ -89,14 +77,6 @@ class Dataset(data.Dataset):
                     _feature_helper(mol_feature_matrix, scalers)
             else:
                 _feature_helper(dp.atom_feature_matrix, scalers)
-
-    # def normalize_targets(self, scaler: StandardScaler) -> None:
-    #     """
-    #     Normalize the targets of the dataset in place using a provided scaler.
-    #     :param scaler: An sklearn StandardScaler previously fit to the targets of a dataset.
-    #     """
-    #     for dp in self.datapoints:
-    #         dp.target = scaler.transform(dp.target)
 
     def to(self, device: torch.device) -> None:
         """

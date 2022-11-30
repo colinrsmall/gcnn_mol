@@ -3,10 +3,10 @@ import numpy.typing as npt
 import torch
 from rdkit.Chem.rdchem import Atom, Mol
 from rdkit.Chem import GetAdjacencyMatrix
-from rdkit.Chem import MolToSmiles, MolFromSmiles
+from rdkit.Chem import MolFromSmiles
 
 from data import atom_descriptors, molecule_descriptors
-from args import TrainArgs
+from utils.args import TrainArgs
 from data.moldata import SingleMolDatapoint, MultiMolDatapoint
 
 from typing import Union, Optional, Tuple

@@ -1,8 +1,11 @@
+from datetime import datetime
 from typing import Literal
 
 from tap import Tap
 
 from data import atom_descriptors, molecule_descriptors
+
+from . import metrics
 
 
 class TrainArgs(Tap):
@@ -73,6 +76,31 @@ class TrainArgs(Tap):
     target_column: str
     """The name of the column that contains the training target."""
 
+    # ~~~ Misc. Training Args ~~~
+
+    model_save_path: str = None
+    """Path at which to save the trained model and data scalers. If None, model will not be saved."""
+
+    model_save_name: str = None
+    """The name of the model to save at the given model save path. If None, defaults to the datetime stamp when the
+       model's training process is started."""
+
+    epochs: int = 100
+    """The number of epochs to train the model for."""
+
+    metrics: list[str] = ["mse"]
+    """Which metrics to evaluate the model's performance with."""
+
+    model_save_metric: str = metrics[0]
+    """The metric with which the best performing models are saved during model training. Defaults to the first metric
+       passed in the list of metrics to evaluate."""
+
+    log_file_path: str = None
+    """The path to save the model training log file at. If None, no log file will be generated."""
+
+    wandb_logging: bool = False
+    """If passed, model training will be logged on wandb."""
+
     def process_args(self) -> None:
         """
         Checks that argument choices are valid.
@@ -90,25 +118,36 @@ class TrainArgs(Tap):
         if not self.readout_hidden_size:
             self.readout_hidden_size = self.hidden_size
 
-            # Ensure number of molecules matches the number of molecule smiles columns
-            if self.number_of_molecules != len(self.molecule_smiles_columns):
+        # Ensure number of molecules matches the number of molecule smiles columns
+        if self.number_of_molecules != len(self.molecule_smiles_columns):
+            raise ValueError(
+                f"Number of molecules ({self.number_of_molecules}) does not match the number of molecule"
+                f"SMILES columns ({len(self.molecule_smiles_columns)})."
+            )
+
+        # Ensure chosen atom descriptors are valid, or load all descriptors if using all
+        if self.atom_descriptors != ["all"]:
+            for descriptor in self.atom_descriptors:
+                if descriptor not in atom_descriptors.all_descriptors():
+                    raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
+        else:
+            self.atom_descriptors = atom_descriptors.all_descriptors().keys()
+
+        # Ensure chosen molecule descriptors are valid, or load all descriptors if using all
+        if self.molecule_descriptors != ["all"]:
+            for descriptor in self.molecule_descriptors:
+                if descriptor not in molecule_descriptors.all_descriptors():
+                    raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
+        else:
+            self.molecule_descriptors = molecule_descriptors.all_descriptors().keys()
+
+        # Ensure chosen metrics are valid
+        for metric in self.metrics:
+            if metric not in metrics.all_metrics():
                 raise ValueError(
-                    f"Number of molecules ({self.number_of_molecules}) does not match the number of molecule"
-                    f"SMILES columns ({len(self.molecule_smiles_columns)})."
+                    f"Metric {metric} is not a valid metric. Check utils/metrics.py for list of valid metrics."
                 )
 
-            # Ensure chosen atom descriptors are valid, or load all descriptors if using all
-            if self.atom_descriptors != ["all"]:
-                for descriptor in self.atom_descriptors:
-                    if descriptor not in atom_descriptors.all_descriptors():
-                        raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
-            else:
-                self.atom_descriptors = atom_descriptors.all_descriptors().keys()
-
-            # Ensure chosen molecule descriptors are valid, or load all descriptors if using all
-            if self.molecule_descriptors != ["all"]:
-                for descriptor in self.molecule_descriptors:
-                    if descriptor not in molecule_descriptors.all_descriptors():
-                        raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
-            else:
-                self.molecule_descriptors = molecule_descriptors.all_descriptors().keys()
+        # Set model save name to the current datetime stamp if no model name is provided
+        if self.model_save_name is None:
+            self.model_save_name = f"gcnn_mol_trained_{str(datetime.now())}"
