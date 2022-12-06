@@ -17,12 +17,12 @@ pairs of antibiotics.
 - [ ] Implement automated hyperparameter optimization
 - [x] ~~Fix target value normalization~~ Done 11/29 - Decided not to implement target scaling
 - [ ] Create predict.py script to run
-- [ ] Implement more activation functions:
-  - [ ] PReLu
-  - [ ] SeLu
-  - [ ] TanH
-  - [ ] Leaky ReLu
-- [ ] Implement additional loss functions
+- [x] ~~Implement more activation functions:~~ Done 12/6
+  - [x] PReLu
+  - [x] SeLu
+  - [x] TanH
+  - [x] Leaky ReLu
+- [x] ~~Implement additional loss functions~~ Done 12/6 - Although I am considering adding margin-ranking loss too
 - [ ] Fix readout dropout from generating NaN
 - [ ] Implement more aggregation methods
   - [ ] Max

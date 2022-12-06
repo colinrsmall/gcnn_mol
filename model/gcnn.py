@@ -111,8 +111,16 @@ class GCNN(nn.Module):
         match train_args.activation_function:
             case "ReLU":
                 self.activation_function = nn.ReLU()
+            case "PReLU":
+                self.activation_function = nn.PReLU()
+            case "SeLU":
+                self.activation_function = nn.SELU()
+            case "tanh":
+                self.activation_function = nn.Tanh()
+            case "leakyReLU":
+                self.activation_function = nn.LeakyReLU()
             case _:
-                raise ValueError(f"{self.activation}")
+                raise ValueError(f"{self.activation} not implemented.")
 
     def forward(self, datapoint: Union[SingleMolDatapoint, MultiMolDatapoint]):
         def forward_helper(adjacency_matrix: Tensor, atom_feature_matrix: Tensor, mol_features: Tensor) -> Tensor:

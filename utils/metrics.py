@@ -32,6 +32,16 @@ def mse(outputs: list[float], targets: list[float]) -> float:
     return mean_squared_error(targets, outputs)
 
 
+def rmse(outputs: list[float], targets: list[float]) -> float:
+    """
+    Returns the root mean squared error between a list of model outputs and a list of targets.
+    :param outputs: A list of floats of values outputted by the model.
+    :param targets: A lis of floats of targets of the model's training.
+    :return: The mean squared error between the outputs and targets.
+    """
+    return mean_squared_error(targets, outputs)
+
+
 def mae(outputs: list[float], targets: list[float]) -> float:
     """
     Returns the mean absolute error between a list of model outputs and a list of targets.
@@ -39,7 +49,7 @@ def mae(outputs: list[float], targets: list[float]) -> float:
     :param targets: A lis of floats of targets of the model's training.
     :return: The mean absolute error between the outputs and targets.
     """
-    return mean_absolute_error(targets, outputs)
+    return mean_squared_error(targets, outputs, squared=False)
 
 
 def all_metrics():
@@ -48,6 +58,7 @@ def all_metrics():
         "kendall": kendall,
         "mse": mse,
         "mae": mae,
+        "rmse": rmse,
     }
 
     return metrics

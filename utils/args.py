@@ -101,6 +101,24 @@ class TrainArgs(Tap):
     wandb_logging: bool = False
     """If passed, model training will be logged on wandb."""
 
+    sgd_nesterov: bool = False
+    """Enables Nesterov momentum for SGD optimizer."""
+
+    sgd_lr: float = 0.001
+    """Learning rate for SGD optimizer."""
+
+    sgd_momentum: float = 0.9
+    """Momentum factor for SGD optimizer."""
+
+    sgd_weight_decay: float = 0
+    """Weight decay (L2 penalty) for SGD optimizer."""
+
+    sgd_dampening: float = 0
+    """Dampening rate for momentum for SGD optimizer."""
+
+    loss_function: Literal["mse", "mae"] = "mae"
+    """Loss function used when training the model."""
+
     def process_args(self) -> None:
         """
         Checks that argument choices are valid.

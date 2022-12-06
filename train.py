@@ -64,8 +64,22 @@ def train_model(train_args: TrainArgs):
         )
 
     # Initiate model optimizer and loss function
-    optimizer = optim.SGD(m.parameters(), lr=0.001, momentum=0.9)
-    loss_function = nn.MSELoss()
+    optimizer = optim.SGD(
+        m.parameters(),
+        lr=train_args.sgd_lr,
+        momentum=train_args.sgd_momentum,
+        nesterov=train_args.sgd_nesterov,
+        dampening=train_args.sgd_dampening,
+        weight_decay=train_args.sgd_weight_decay,
+    )
+
+    match train_args.loss_function:
+        case "mae":
+            loss_function = nn.MSELoss()
+        case "mse":
+            loss_function = nn.L1Loss()
+        case _:
+            raise ValueError(f"{train_args.loss_function} not implemented.")
 
     # Initiate dictionaries to save test and training metrics in
     training_metrics = {metric: 0 for metric in train_args.metrics}
