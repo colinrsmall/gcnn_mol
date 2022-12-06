@@ -43,7 +43,11 @@ class Dataset(data.Dataset):
 
         # Initialize scaler and stack each molecule datapoints' atom feature matrices into a single matrix
         scalers = [(StandardScaler() if f else None) for f in self.features_to_normalize]
-        atom_features_stack = torch.vstack([torch.vstack(dp.atom_feature_matrices) for dp in self.datapoints])
+
+        if self.num_molecules_per_datapoint > 1:
+            atom_features_stack = torch.vstack([torch.vstack(dp.atom_feature_matrices) for dp in self.datapoints])
+        else:
+            atom_features_stack = torch.vstack([dp.atom_feature_matrix for dp in self.datapoints])
 
         # Fit each scaler
         for i, feature in enumerate(self.features_to_normalize):

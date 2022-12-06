@@ -94,7 +94,7 @@ class MoleculeFeaturizer:
     def featurize_datapoint(self, smiles: Union[str, list[str]], number_of_molecules: int, target: float):
 
         if number_of_molecules == 1:
-            smiles, adjacency_matrix, atom_feature_matrix, mol_features = self._featurize_mol(smiles)
+            smiles, adjacency_matrix, atom_feature_matrix, mol_features = self._featurize_mol(smiles[0])
             return SingleMolDatapoint(smiles, adjacency_matrix, atom_feature_matrix, mol_features, target)
 
         else:
