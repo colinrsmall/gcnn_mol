@@ -111,10 +111,7 @@ def train_model(train_args: TrainArgs):
             training_outputs.append(output.detach().cpu().numpy())
 
             # Calculate loss, backprop, and update optimizer
-            # Check if output and target will produce 0, fudge output if so
-            if output == torch.Tensor([datapoint.target], device=device):
-                output += 1e-4
-            loss = loss_function(output, torch.Tensor([datapoint.target], device=device))
+            loss = loss_function(output, torch.Tensor([datapoint.target]).to(device))
             running_loss = loss.item()
             loss.backward()
             optimizer.step()
