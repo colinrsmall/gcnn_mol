@@ -70,6 +70,7 @@ class GCNN(nn.Module):
         atom_feature_vector_length,
         number_of_molecules,
         mol_feature_vector_length: int,
+        device: torch.device,
     ):
         super().__init__()
 
@@ -89,7 +90,7 @@ class GCNN(nn.Module):
 
         # Build LAF aggregation layer if using
         if train_args.aggregation_method == "LAF":
-            self.laf = LAFLayerFast(units=1)
+            self.laf = LAFLayerFast(units=1, device=device)
 
         # Build readout layer
         self.readout_hidden_nns = []

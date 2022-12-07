@@ -61,6 +61,7 @@ def train_model(train_args: TrainArgs):
             dataset.atom_features_vector_length,
             train_args.number_of_molecules,
             dataset.mol_features_vector_length,
+            device,
         )
 
     # Initiate model optimizer and loss function
