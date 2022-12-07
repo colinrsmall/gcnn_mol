@@ -112,9 +112,9 @@ def train_model(train_args: TrainArgs):
 
             # Calculate loss, backprop, and update optimizer
             # Check if output and target will produce 0, fudge output if so
-            if output == torch.Tensor([datapoint.target]):
+            if output == torch.Tensor([datapoint.target], device=device):
                 output += 1e-4
-            loss = loss_function(output, torch.Tensor([datapoint.target]))
+            loss = loss_function(output, torch.Tensor([datapoint.target], device=device))
             running_loss = loss.item()
             loss.backward()
             optimizer.step()
@@ -131,7 +131,7 @@ def train_model(train_args: TrainArgs):
         for datapoint in tqdm(test_set, desc="Test set:", leave=False, total=len(test_set)):
             # Forward pass of model
             output = m.forward(datapoint)
-            test_outputs.append(output.detach().numpy())
+            test_outputs.append(output.detach().cpu().numpy())
 
         # Calculate test set metrics
         for metric in train_args.metrics:
