@@ -119,6 +119,9 @@ class TrainArgs(Tap):
     loss_function: Literal["mse", "mae"] = "mse"
     """Loss function used when training the model."""
 
+    cpu: bool = False
+    """Force training to use the CPU instead of an available GPU."""
+
     def process_args(self) -> None:
         """
         Checks that argument choices are valid.
