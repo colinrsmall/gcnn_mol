@@ -36,6 +36,7 @@ def train_model(train_args: TrainArgs):
 
     # Detect device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Detected device: {device}")
 
     # Load data according to train_args settings
     dataset = load_dataset(train_args)
