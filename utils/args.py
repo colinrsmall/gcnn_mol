@@ -116,7 +116,7 @@ class TrainArgs(Tap):
     sgd_dampening: float = 0
     """Dampening rate for momentum for SGD optimizer."""
 
-    loss_function: Literal["mse", "mae"] = "mae"
+    loss_function: Literal["mse", "mae"] = "mse"
     """Loss function used when training the model."""
 
     def process_args(self) -> None:

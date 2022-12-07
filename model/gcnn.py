@@ -1,5 +1,6 @@
 from typing import Union
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -202,12 +203,15 @@ class GCNN(nn.Module):
 
         # Readout
         latent_representation = self.readout_input_layer(latent_representation)
+        latent_representation = self.activation_function(latent_representation)
 
         for depth in range(self.train_args.readout_num_hidden_layers):
             latent_representation = self.readout_hidden_nns[depth](latent_representation)
 
             if self.train_args.readout_dropout:
                 latent_representation = self.dropout(latent_representation)
+
+            latent_representation = self.activation_function(latent_representation)
 
         output = self.readout_output_layer(latent_representation)
 

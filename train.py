@@ -56,7 +56,7 @@ def train_model(train_args: TrainArgs):
             train_args,
             dataset.mol_features_vector_length,
             train_args.number_of_molecules,
-        )
+        ).to(device)
     else:
         m = gcnn.GCNN(
             train_args,
@@ -64,7 +64,7 @@ def train_model(train_args: TrainArgs):
             train_args.number_of_molecules,
             dataset.mol_features_vector_length,
             device,
-        )
+        ).to(device)
 
     # Initiate model optimizer and loss function
     optimizer = optim.SGD(
@@ -78,9 +78,9 @@ def train_model(train_args: TrainArgs):
 
     match train_args.loss_function:
         case "mae":
-            loss_function = nn.MSELoss()
-        case "mse":
             loss_function = nn.L1Loss()
+        case "mse":
+            loss_function = nn.MSELoss()
         case _:
             raise ValueError(f"{train_args.loss_function} not implemented.")
 
@@ -94,6 +94,7 @@ def train_model(train_args: TrainArgs):
         wandb.watch(m, loss_function, "all")
 
     pbar = tqdm(range(train_args.epochs))
+    torch.autograd.set_detect_anomaly(True)
     for epoch in pbar:
         training_outputs = []
         training_targets = [dp.target for dp in train_set]
@@ -110,6 +111,9 @@ def train_model(train_args: TrainArgs):
             training_outputs.append(output.detach().numpy())
 
             # Calculate loss, backprop, and update optimizer
+            # Check if output and target will produce 0, fudge output if so
+            if output == torch.Tensor([datapoint.target]):
+                output += 1e-4
             loss = loss_function(output, torch.Tensor([datapoint.target]))
             running_loss = loss.item()
             loss.backward()
