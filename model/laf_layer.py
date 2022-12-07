@@ -108,8 +108,6 @@ class LAFLayerFast(AbstractLAFLayer):
         x = torch.unsqueeze(x, -1)
         e = e.view(1, 1, -1)
 
-        print(x.device)
-        print(e.device)
         exps = (1.0 - e) / 2.0 + x * e
         exps = torch.unsqueeze(exps, -1)
         exps = torch.pow(exps, torch.relu(self.weights[0:4]))

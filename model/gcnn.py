@@ -155,6 +155,7 @@ class GCNN(nn.Module):
                         for atom_idx in range(len(adjacency_matrix)):
                             # Collect the neighbors (and their features) of the given atom
                             neighbors = lr_helper[torch.where(adjacency_matrix[atom_idx] > 0)]
+                            print(neighbors.device)
                             # Pass the neighbors (and their features) through the LAF layer
                             agg = self.laf(neighbors.T)
                             # Build a separate latent representation so we that don't adjust features mid-aggregation
