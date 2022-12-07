@@ -39,11 +39,13 @@ def train_model(train_args: TrainArgs):
 
     # Load data according to train_args settings
     dataset = load_dataset(train_args)
-    dataset.to(device)
 
     # Scale dataset features
     feature_scalers = dataset.fit_scalers_to_features()
     dataset.normalize_features(feature_scalers)
+
+    # Move dateset to detected device
+    dataset.to(device)
 
     # Split data in to training and test set
     train_set, test_set = dataset.train_test_split(0.2)
