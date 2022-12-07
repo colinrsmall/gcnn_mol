@@ -42,7 +42,7 @@ class TrainArgs(Tap):
     dropout_probability: float = 0.0
     """Dropout probability."""
 
-    aggregation_method: Literal["mean", "sum"] = "mean"
+    aggregation_method: Literal["mean", "sum", "LAF"] = "LAF"
     """Aggregation method during graph convolution."""
 
     shared_node_level_nns: bool = False

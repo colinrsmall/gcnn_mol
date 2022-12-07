@@ -132,4 +132,5 @@ dmypy.json
 
 pyproject.toml
 
+wandb/
 .DS_Store

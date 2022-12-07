@@ -7,6 +7,8 @@ from torch import Tensor
 from utils.args import TrainArgs
 from data.moldata import MultiMolDatapoint, SingleMolDatapoint
 
+from model.laf_layer import LAFLayerFast
+
 
 class FCNNOnly(nn.Module):
     def __init__(self, train_args: TrainArgs, mol_feature_vector_length: int, number_of_molecules: int):
@@ -85,6 +87,10 @@ class GCNN(nn.Module):
             for depth in range(train_args.depth):
                 self.node_level_nns.append(nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias))
 
+        # Build LAF aggregation layer if using
+        if train_args.aggregation_method == "LAF":
+            self.laf = LAFLayerFast(units=1)
+
         # Build readout layer
         self.readout_hidden_nns = []
 
@@ -143,6 +149,17 @@ class GCNN(nn.Module):
                         lr_helper = (torch.mm(adjacency_matrix, lr_helper).T / torch.sum(adjacency_matrix, dim=1)).T
                     case "sum":
                         lr_helper = torch.mm(adjacency_matrix, lr_helper)
+                    case "LAF":
+                        lr_helper_after_aggregation = torch.zeros(lr_helper.shape, device=lr_helper.device)
+                        # Iterate through each atom_idx in a molecule
+                        for atom_idx in range(len(adjacency_matrix)):
+                            # Collect the neighbors (and their features) of the given atom
+                            neighbors = lr_helper[torch.where(adjacency_matrix[atom_idx] > 0)]
+                            # Pass the neighbors (and their features) through the LAF layer
+                            agg = self.laf(neighbors.T)
+                            # Build a separate latent representation so we that don't adjust features mid-aggregation
+                            lr_helper_after_aggregation[atom_idx, :] = agg[0, :, 0]
+                        lr_helper = lr_helper_after_aggregation
                     case x:
                         raise ValueError(f"Aggregation method {x} not implemented.")
 
@@ -188,9 +205,8 @@ class GCNN(nn.Module):
         for depth in range(self.train_args.readout_num_hidden_layers):
             latent_representation = self.readout_hidden_nns[depth](latent_representation)
 
-            # TODO: Using readout dropout leads to NN outputting NaN, fix this
-            # if self.train_args.readout_dropout:
-            #     latent_representation = self.dropout(latent_representation)
+            if self.train_args.readout_dropout:
+                latent_representation = self.dropout(latent_representation)
 
         output = self.readout_output_layer(latent_representation)
 
