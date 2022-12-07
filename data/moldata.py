@@ -39,12 +39,9 @@ class SingleMolDatapoint(AbstractDatapoint):
         self.target = target
 
     def to(self, device) -> None:
-        print(f"Device: {device}")
-        print(f"Before moving: {self.adjacency_matrix.device}")
         self.adjacency_matrix = self.adjacency_matrix.to(device)
-        print(f"After moving: {self.adjacency_matrix.device}")
-        self.atom_feature_matrix.to(device)
-        self.molecule_features_vector.to(device)
+        self.atom_feature_matrix = self.atom_feature_matrix.to(device)
+        self.molecule_features_vector = self.molecule_features_vector.to(device)
         # self.target.to(device)
 
 
@@ -79,7 +76,7 @@ class MultiMolDatapoint(AbstractDatapoint):
 
     def to(self, device) -> None:
         for i in range(len(self.smiles_list)):
-            self.adjacency_matrices[i].to(device)
-            self.atom_feature_matrices[i].to(device)
-            self.molecule_feature_vectors[i].to(device)
+            self.adjacency_matrices[i] = self.adjacency_matrices[i].to(device)
+            self.atom_feature_matrices[i] = self.atom_feature_matrices[i].to(device)
+            self.molecule_feature_vectors[i] = self.molecule_feature_vectors[i].to(device)
         # self.target.to(device)
