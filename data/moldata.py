@@ -39,7 +39,10 @@ class SingleMolDatapoint(AbstractDatapoint):
         self.target = target
 
     def to(self, device) -> None:
+        print(f"Device: {device}")
+        print(f"Before moving: {self.adjacency_matrix.device}")
         self.adjacency_matrix.to(device)
+        print(f"After moving: {self.adjacency_matrix.device}")
         self.atom_feature_matrix.to(device)
         self.molecule_features_vector.to(device)
         # self.target.to(device)
