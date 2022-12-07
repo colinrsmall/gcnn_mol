@@ -108,7 +108,7 @@ def train_model(train_args: TrainArgs):
 
             # Forward pass of model
             output = m.forward(datapoint)
-            training_outputs.append(output.detach().numpy())
+            training_outputs.append(output.detach().cpu().numpy())
 
             # Calculate loss, backprop, and update optimizer
             # Check if output and target will produce 0, fudge output if so
