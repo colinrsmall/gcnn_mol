@@ -79,15 +79,21 @@ class GCNN(nn.Module):
         self.number_of_molecules = number_of_molecules
 
         # Build input layer
-        self.input_node_level_nn = nn.Linear(atom_feature_vector_length, train_args.hidden_size, train_args.bias)
+        self.input_node_level_nn = nn.Linear(
+            atom_feature_vector_length, train_args.hidden_size, train_args.bias, device=device
+        )
 
         # Build node-level NNs
         if train_args.shared_node_level_nns:
-            self.node_level_nn = nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias)
+            self.node_level_nn = nn.Linear(
+                train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device
+            )
         else:  # separate node-level NNs per depth level
             self.node_level_nns = []
             for depth in range(train_args.depth):
-                self.node_level_nns.append(nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias))
+                self.node_level_nns.append(
+                    nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device)
+                )
 
         # Build LAF aggregation layer if using
         if train_args.aggregation_method == "LAF":
@@ -99,14 +105,18 @@ class GCNN(nn.Module):
         readout_input_size = (
             train_args.hidden_size * number_of_molecules + mol_feature_vector_length * number_of_molecules
         )
-        self.readout_input_layer = nn.Linear(readout_input_size, train_args.readout_hidden_size, train_args.bias)
+        self.readout_input_layer = nn.Linear(
+            readout_input_size, train_args.readout_hidden_size, train_args.bias, device=device
+        )
 
         for depth in range(train_args.readout_num_hidden_layers):
             self.readout_hidden_nns.append(
-                nn.Linear(train_args.readout_hidden_size, train_args.readout_hidden_size, train_args.bias)
+                nn.Linear(
+                    train_args.readout_hidden_size, train_args.readout_hidden_size, train_args.bias, device=device
+                )
             )
 
-        self.readout_output_layer = nn.Linear(train_args.readout_hidden_size, 1, train_args.bias)
+        self.readout_output_layer = nn.Linear(train_args.readout_hidden_size, 1, train_args.bias, device=device)
 
         # Set dropout layer if using
         if train_args.node_level_dropout or train_args.readout_dropout:
