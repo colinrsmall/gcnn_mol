@@ -98,6 +98,7 @@ class GCNN(nn.Module):
         # Build LAF aggregation layer if using
         if train_args.aggregation_method == "LAF":
             self.laf = LAFLayerFast(units=1, device=device)
+            self.readout_laf = LAFLayerFast(units=1, device=device)
 
         # Build readout layer
         self.readout_hidden_nns = []
@@ -185,10 +186,14 @@ class GCNN(nn.Module):
                 if self.train_args.node_level_dropout:
                     lr_helper = self.dropout(lr_helper)
 
-            # Readout aggregation. Only sun for now.
-            # TODO: Implement several readout aggregation methods
-            # TODO: See list at: https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html
-            lr_helper = torch.sum(lr_helper, dim=0)
+            # Readout aggregation
+            match self.train_args.aggregation_method:
+                case "sum":
+                    lr_helper = torch.sum(lr_helper, dim=0)
+                case "LAF":
+                    lr_helper = self.readout_laf(lr_helper)[0, :, 0]
+                case x:
+                    raise ValueError(f"Aggregation method {x} not implemented.")
 
             # Concatenate molecule features to latent representation
             lr_helper = torch.cat((lr_helper, mol_features))
