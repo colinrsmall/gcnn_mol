@@ -97,7 +97,7 @@ def train_model(train_args: TrainArgs):
         wandb.watch(m, loss_function, "all")
 
     pbar = tqdm(range(train_args.epochs))
-    torch.autograd.set_detect_anomaly(True)
+    # torch.autograd.set_detect_anomaly(True)
     for epoch in pbar:
         training_outputs = []
         training_targets = [dp.target for dp in train_set]
