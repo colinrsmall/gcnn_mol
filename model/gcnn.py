@@ -191,7 +191,7 @@ class GCNN(nn.Module):
                 case "sum":
                     lr_helper = torch.sum(lr_helper, dim=0)
                 case "LAF":
-                    lr_helper = self.readout_laf(lr_helper)[0, :, 0]
+                    lr_helper = self.readout_laf(lr_helper.T)[0, :, 0]
                 case x:
                     raise ValueError(f"Aggregation method {x} not implemented.")
 

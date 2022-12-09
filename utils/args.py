@@ -88,7 +88,7 @@ class TrainArgs(Tap):
     epochs: int = 100
     """The number of epochs to train the model for."""
 
-    metrics: list[str] = ["mse"]
+    metrics: list[str] = ["mse", "rmse", "mae", "kendall", "spearman"]
     """Which metrics to evaluate the model's performance with."""
 
     model_save_metric: str = metrics[0]
