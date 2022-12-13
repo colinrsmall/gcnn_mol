@@ -42,7 +42,7 @@ class TrainArgs(Tap):
     dropout_probability: float = 0.0
     """Dropout probability."""
 
-    aggregation_method: Literal["mean", "sum", "LAF"] = "LAF"
+    aggregation_method: Literal["mean", "sum", "LAF"] = "sum"
     """Aggregation method during graph convolution."""
 
     shared_node_level_nns: bool = False
@@ -51,6 +51,12 @@ class TrainArgs(Tap):
     mol_features_only: bool = False
     """Whether the model should use molecule features only. If true, the model will not use graph convolution and will
        only feed molecule features through the readout fully connected NN."""
+
+    graph_attention: bool = False
+    """Whether to enable graph attention layer."""
+
+    graph_attention_activation: Literal["sigmoid", "softmax"] = "sigmoid"
+    """Which activation function to use on the output of the graph attention layer. Velickovic et al. use SoftMax."""
 
     # ~~~ Data Arguments ~~~
 

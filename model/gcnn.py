@@ -78,6 +78,17 @@ class GCNN(nn.Module):
         self.train_args = train_args
         self.number_of_molecules = number_of_molecules
 
+        # Build graph attention mechanism
+        if train_args.graph_attention:
+            self.graph_attention = nn.Linear(train_args.hidden_size * 2, 1, train_args.bias, device=device)
+            match train_args.graph_attention_activation:
+                case "softmax":
+                    self.attention_activation = nn.Softmax(dim=1)
+                case "sigmoid":
+                    self.attention_activation = nn.Sigmoid()
+                case x:
+                    raise ValueError(f"Graph attention activation {x} not implemented.")
+
         # Build input layer
         self.input_node_level_nn = nn.Linear(
             atom_feature_vector_length, train_args.hidden_size, train_args.bias, device=device
@@ -145,6 +156,7 @@ class GCNN(nn.Module):
         def forward_helper(adjacency_matrix: Tensor, atom_feature_matrix: Tensor, mol_features: Tensor) -> Tensor:
             """
             Helper function for a forward pass of the NN.
+            :param mol_features:
             :param adjacency_matrix:
             :param atom_feature_matrix:
             :return:
@@ -156,18 +168,42 @@ class GCNN(nn.Module):
 
             # Message passing
             for depth in range(self.train_args.depth):
+                # Graph attention
+                if self.train_args.graph_attention:
+                    # Create copy of adjacency matrix that will be scaled via attention
+                    attentive_adjacency_matrix = torch.clone(adjacency_matrix)
+                    # Calculate attention for each atom
+                    for atom_idx in range(len(adjacency_matrix)):
+                        # Get indices in adjacency matrix of the current atom's neighbors
+                        neighbor_indices = torch.where(adjacency_matrix[atom_idx] > 0)
+                        neighbors = lr_helper[neighbor_indices]
+                        # Run a batch of neighbor-centroid atom pairs through the attention layer
+                        attention_vector = self.graph_attention(
+                            torch.concat([neighbors, torch.stack([lr_helper[atom_idx]] * len(neighbors))], dim=1)
+                        )
+                        attention_vector = self.attention_activation(attention_vector)
+                        # Scale the adjacency matrix by the calculated attentions
+                        attentive_adjacency_matrix[atom_idx, neighbor_indices[0]] = attentive_adjacency_matrix[
+                            atom_idx, neighbor_indices[0]
+                        ] * attention_vector.view(-1)
+                else:
+                    attentive_adjacency_matrix = adjacency_matrix
+
                 # Aggregation
                 match self.train_args.aggregation_method:
                     case "mean":
-                        lr_helper = (torch.mm(adjacency_matrix, lr_helper).T / torch.sum(adjacency_matrix, dim=1)).T
+                        lr_helper = (
+                            torch.mm(attentive_adjacency_matrix, lr_helper).T
+                            / torch.sum(attentive_adjacency_matrix, dim=1)
+                        ).T
                     case "sum":
-                        lr_helper = torch.mm(adjacency_matrix, lr_helper)
+                        lr_helper = torch.mm(attentive_adjacency_matrix, lr_helper)
                     case "LAF":
                         lr_helper_after_aggregation = torch.zeros(lr_helper.shape, device=lr_helper.device)
                         # Iterate through each atom_idx in a molecule
-                        for atom_idx in range(len(adjacency_matrix)):
+                        for atom_idx in range(len(attentive_adjacency_matrix)):
                             # Collect the neighbors (and their features) of the given atom
-                            neighbors = lr_helper[torch.where(adjacency_matrix[atom_idx] > 0)]
+                            neighbors = lr_helper[torch.where(attentive_adjacency_matrix[atom_idx] > 0)]
                             # Pass the neighbors (and their features) through the LAF layer
                             agg = self.laf(neighbors.T)
                             # Build a separate latent representation so we that don't adjust features mid-aggregation
