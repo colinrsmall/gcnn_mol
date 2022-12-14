@@ -175,6 +175,8 @@ class TrainArgs(Tap):
             self.molecule_descriptors = molecule_descriptors.all_descriptors().keys()
 
         # Ensure chosen metrics are valid
+        if self.metrics == "all":  # Workaround for wandb hyperparameter sweep
+            self.metrics = ["mse", "rmse", "mae", "kendall", "spearman"]
         for metric in self.metrics:
             if metric not in metrics.all_metrics():
                 raise ValueError(
