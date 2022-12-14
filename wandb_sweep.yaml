@@ -42,7 +42,7 @@ parameters:
   target_column:
     value: "exp"
   metrics:
-    value: mae mse spearman kendall rmse
+    value: "mae" "mse" "spearman" "kendall" "rmse"
   wandb_logging:
     value: True
 
