@@ -224,6 +224,8 @@ class GCNN(nn.Module):
 
             # Readout aggregation
             match self.train_args.aggregation_method:
+                case "mean":
+                    lr_helper = torch.mean(lr_helper, dim=0)
                 case "sum":
                     lr_helper = torch.sum(lr_helper, dim=0)
                 case "LAF":
