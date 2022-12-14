@@ -97,7 +97,7 @@ def train_model(train_args: TrainArgs):
         wandb.watch(m, loss_function, "all")
 
     # Set torch detect anomalies for debugging if desired
-    if train_args.detect_anomolies:
+    if train_args.detect_anomalies:
         torch.autograd.set_detect_anomaly(True)
 
     # Run training
