@@ -128,6 +128,9 @@ class TrainArgs(Tap):
     cpu: bool = False
     """Force training to use the CPU instead of an available GPU."""
 
+    detect_anomolies: bool = False
+    """Whether to set torch.autograd.set_detect_anomaly(True) when training."""
+
     def process_args(self) -> None:
         """
         Checks that argument choices are valid.

@@ -92,12 +92,16 @@ def train_model(train_args: TrainArgs):
     test_metrics = {metric: 0 for metric in train_args.metrics}
     model_save_metric = 0
 
-    # Run model training
+    # Turn on wandb logging if desired
     if train_args.wandb_logging:
         wandb.watch(m, loss_function, "all")
 
+    # Set torch detect anomalies for debugging if desired
+    if train_args.detect_anomolies:
+        torch.autograd.set_detect_anomaly(True)
+
+    # Run training
     pbar = tqdm(range(train_args.epochs))
-    torch.autograd.set_detect_anomaly(True)
     for epoch in pbar:
         training_outputs = []
         training_targets = [dp.target for dp in train_set]
