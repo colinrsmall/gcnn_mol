@@ -18,7 +18,7 @@ parameters:
   shared_node_level_nns:
     value: False
   activation_function:
-    value: "Relu"
+    value: "ReLu"
   aggregation_method:
     value: "mean"
   explicit_hydrogens:
