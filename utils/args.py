@@ -33,10 +33,10 @@ class TrainArgs(Tap):
     bias: bool = True
     """Whether to enable bias in node-level NNs and in readout NN."""
 
-    node_level_dropout: bool = False
+    node_level_dropout: bool = True
     """Whether to enable dropout in node-level NNs."""
 
-    readout_dropout: bool = False
+    readout_dropout: bool = True
     """Whether to enable dropout in readout FCNN."""
 
     dropout_probability: float = 0.0
@@ -130,6 +130,9 @@ class TrainArgs(Tap):
 
     detect_anomalies: bool = False
     """Whether to set torch.autograd.set_detect_anomaly(True) when training."""
+
+    sweep_config: str = None
+    """If provided, arguments in the pointed to YAML file will be used as part of a wandb hyperparameter swep."""
 
     def process_args(self) -> None:
         """

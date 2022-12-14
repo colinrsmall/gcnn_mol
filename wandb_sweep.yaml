@@ -1,0 +1,39 @@
+program: train.py
+
+method: grid
+
+metric:
+  goal: minimize
+  name: test_rmse
+
+parameters:
+  dropout_probability:
+    values: [0.25, 0.5, 0.75]
+  readout_hidden_size:
+    values: [1, 2, 4]
+  hidden_size:
+    values: [128, 256, 512]
+  depth:
+    values: [2, 3, 4, 5]
+  shared_node_level_nns:
+    value: False
+  activation_function:
+    value: Relu
+  aggregation_method:
+    value: mean
+  explicit_hydrogens:
+    value: False
+  graph_attention:
+    value: False
+  graph_attention_activation:
+    value: False
+  bias:
+    value: True
+  epochs:
+    value: 20
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_boolean_flags}

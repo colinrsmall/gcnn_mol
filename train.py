@@ -9,6 +9,7 @@ import torch
 import torch.optim as optim
 
 import wandb
+import yaml
 
 
 def train_model(train_args: TrainArgs):
@@ -32,7 +33,18 @@ def train_model(train_args: TrainArgs):
             "explicit_hydrogens": train_args.explicit_hydrogens,
             "atom_descriptors": train_args.atom_descriptors,
             "molecule_descriptors": train_args.molecule_descriptors,
+            "sgd_lr": train_args.sgd_lr,
+            "sgd_nesterov": train_args.sgd_nesterov,
+            "sgd_momentum": train_args.sgd_momentum,
+            "sgd_weight_decay": train_args.sgd_weight_decay,
+            "sgd_dampening": train_args.sgd_dampening,
         }
+
+    # Load config from file if doing hyperparameter sweep
+    if train_args.sweep_config:
+        with open(train_args.sweep_config) as file:
+            config = yaml.load(file, Loader=yaml.FullLoader)
+            wandb.config = config
 
     # Detect device
     if train_args.cpu:
@@ -79,6 +91,7 @@ def train_model(train_args: TrainArgs):
         weight_decay=train_args.sgd_weight_decay,
     )
 
+    # Set loss function
     match train_args.loss_function:
         case "mae":
             loss_function = nn.L1Loss()
@@ -156,7 +169,7 @@ def train_model(train_args: TrainArgs):
         metric_description = "; ".join([f"{metric}: {test_metrics[metric]:.4f}" for metric in train_args.metrics])
         pbar.set_description(metric_description)
 
-        # Log with wandb is using
+        # Log with wandb if using
         if train_args.wandb_logging:
             log_dict = (
                 {f"training_{metric}": value for metric, value in training_metrics.items()}
