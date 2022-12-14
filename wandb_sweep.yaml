@@ -18,9 +18,9 @@ parameters:
   shared_node_level_nns:
     value: False
   activation_function:
-    value: Relu
+    value: "Relu"
   aggregation_method:
-    value: mean
+    value: "mean"
   explicit_hydrogens:
     value: False
   graph_attention:
@@ -31,6 +31,21 @@ parameters:
     value: True
   epochs:
     value: 20
+  sweep_config:
+    value: "/users/crsmall/research/gcnn_mol/wandb_sweep.yaml"
+  dataset_path:
+    value: "/users/crsmall/research/data/input/Lipophilicity.csv"
+  number_of_molecules:
+    value: 1
+  molecule_smiles_columns:
+    value: "smiles"
+  target_column:
+    value: "exp"
+  metrics:
+    value: mae mse spearman kendall rmse
+  wandb_logging:
+    value: True
+
 
 command:
   - ${env}
