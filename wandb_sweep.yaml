@@ -1,4 +1,4 @@
-program: /users/crsmall/research/gcnn_mol/train.py
+program: /users/crsmall/research/gcnn_mol/gcnn_mol.py
 
 method: grid
 
