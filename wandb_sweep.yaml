@@ -10,7 +10,7 @@ parameters:
   dropout_probability:
     values: [0.25, 0.5, 0.75]
   readout_hidden_size:
-    values: [1, 2, 4]
+    values: [128, 256, 512]
   hidden_size:
     values: [128, 256, 512]
   depth:
