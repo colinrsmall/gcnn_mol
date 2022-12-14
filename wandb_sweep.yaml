@@ -18,7 +18,7 @@ parameters:
   shared_node_level_nns:
     value: False
   activation_function:
-    value: "ReLU"
+    values: ["ReLU", "PReLU", "SeLU", "leakyReLU"]
   aggregation_method:
     value: "mean"
   explicit_hydrogens:
@@ -30,7 +30,7 @@ parameters:
   bias:
     value: True
   epochs:
-    value: 20
+    value: 50
   sweep_config:
     value: "/users/crsmall/research/gcnn_mol/wandb_sweep.yaml"
   dataset_path:
@@ -44,6 +44,8 @@ parameters:
   metrics:
     value: "all"
   wandb_logging:
+    value: True
+  sgd_nesterov:
     value: True
 
 
