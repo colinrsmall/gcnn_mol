@@ -8,7 +8,7 @@ metric:
 
 parameters:
   dropout_probability:
-    values: [0.25, 0.5, 0.75]
+    values: [0.3, 0.4, 0.5]
   readout_hidden_size:
     values: [128, 256, 512]
   hidden_size:
