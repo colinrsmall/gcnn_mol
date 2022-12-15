@@ -39,7 +39,7 @@ def rmse(outputs: list[float], targets: list[float]) -> float:
     :param targets: A lis of floats of targets of the model's training.
     :return: The mean squared error between the outputs and targets.
     """
-    return mean_squared_error(targets, outputs)
+    return mean_squared_error(targets, outputs, squared=False)
 
 
 def mae(outputs: list[float], targets: list[float]) -> float:
@@ -49,7 +49,7 @@ def mae(outputs: list[float], targets: list[float]) -> float:
     :param targets: A lis of floats of targets of the model's training.
     :return: The mean absolute error between the outputs and targets.
     """
-    return mean_squared_error(targets, outputs, squared=False)
+    return mean_absolute_error(targets, outputs)
 
 
 def all_metrics():
