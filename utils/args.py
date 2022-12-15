@@ -84,6 +84,9 @@ class TrainArgs(Tap):
 
     # ~~~ Misc. Training Args ~~~
 
+    seed: int = 1
+    """Seed used for torch and sklearn."""
+
     model_save_path: str = None
     """Path at which to save the trained model and data scalers. If None, model will not be saved."""
 
