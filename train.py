@@ -36,11 +36,11 @@ def train_model(train_args: TrainArgs):
             "explicit_hydrogens": train_args.explicit_hydrogens,
             "atom_descriptors": train_args.atom_descriptors,
             "molecule_descriptors": train_args.molecule_descriptors,
-            "sgd_lr": train_args.sgd_lr,
-            "sgd_nesterov": train_args.sgd_nesterov,
-            "sgd_momentum": train_args.sgd_momentum,
-            "sgd_weight_decay": train_args.sgd_weight_decay,
-            "sgd_dampening": train_args.sgd_dampening,
+            # "sgd_lr": train_args.sgd_lr,
+            # "sgd_nesterov": train_args.sgd_nesterov,
+            # "sgd_momentum": train_args.sgd_momentum,
+            # "sgd_weight_decay": train_args.sgd_weight_decay,
+            # "sgd_dampening": train_args.sgd_dampening,
         }
 
     # Load config from file if doing hyperparameter sweep
@@ -85,14 +85,8 @@ def train_model(train_args: TrainArgs):
         ).to(device)
 
     # Initiate model optimizer and loss function
-    optimizer = optim.SGD(
-        m.parameters(),
-        lr=train_args.sgd_lr,
-        momentum=train_args.sgd_momentum,
-        nesterov=train_args.sgd_nesterov,
-        dampening=train_args.sgd_dampening,
-        weight_decay=train_args.sgd_weight_decay,
-    )
+    optimizer = optim.Adam(m.parameters(), lr=0.0003)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
 
     # Set loss function
     match train_args.loss_function:
@@ -137,7 +131,10 @@ def train_model(train_args: TrainArgs):
             loss = loss_function(output, torch.Tensor([datapoint.target]).to(device))
             running_loss = loss.item()
             loss.backward()
+            nn.utils.clip_grad_norm_(m.parameters(), train_args.gradient_clipping_norm)
             optimizer.step()
+
+        scheduler.step()
 
         # Calculate training set metrics
         for metric in train_args.metrics:

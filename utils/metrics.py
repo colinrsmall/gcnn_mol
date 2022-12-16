@@ -40,8 +40,7 @@ def rmse(outputs: list[float], targets: list[float]) -> float:
     :return: The mean squared error between the outputs and targets.
     """
     # Temporary set to mean_squared_error to keep sweep data consistent
-    # return mean_squared_error(targets, outputs, squared=False)
-    return mean_squared_error(targets, outputs)
+    return mean_squared_error(targets, outputs, squared=False)
 
 
 def mae(outputs: list[float], targets: list[float]) -> float:
@@ -52,8 +51,7 @@ def mae(outputs: list[float], targets: list[float]) -> float:
     :return: The mean absolute error between the outputs and targets.
     """
     # Temporary set to mean_squared_error to keep sweep data consistent
-    # return mean_absolute_error(targets, outputs)
-    return mean_squared_error(targets, outputs)
+    return mean_absolute_error(targets, outputs)
 
 
 def all_metrics():

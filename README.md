@@ -14,7 +14,7 @@ pairs of antibiotics.
 - [x] ~~Move training code to train.py~~ Done 11/29
 - [x] ~~Incorporate logging with Neptune~~ Done 11/30 - Using wandb instead
 - [x] ~~Training/test split during training~~ Done 11/29
-- [ ] Implement automated hyperparameter optimization
+- [x] Implement automated hyperparameter optimization
 - [x] ~~Fix target value normalization~~ Done 11/29 - Decided not to implement target scaling
 - [ ] Create predict.py script to run
 - [x] ~~Implement more activation functions:~~ Done 12/6
@@ -23,16 +23,16 @@ pairs of antibiotics.
   - [x] TanH
   - [x] Leaky ReLu
 - [x] ~~Implement additional loss functions~~ Done 12/6 - Although I am considering adding margin-ranking loss too
-- [ ] Fix readout dropout from generating NaN
-- [ ] Implement more aggregation methods
-  - [ ] Max
-  - [ ] Min
-  - [ ] LSTM (see SAGEConv in GraphSAGE)
+- [x] Fix readout dropout from generating NaN
+- [x] Implement more aggregation methods
+  - [x] Max
+  - [x] Min
+  - [x] LAF https://arxiv.org/abs/2012.08482
 - [ ] Graph attention mechanism
 - [ ] Motif/subgraph attention
 - [ ] Co-attention
 - [ ] Motif/subgraph co-attention
-- [ ] Add optimizers to arguments (Adam, SGD, etc.)
+- [ ] Change atom features to those used in https://arxiv.org/pdf/1603.00856v3.pdf
 
 Nice to have:
 
