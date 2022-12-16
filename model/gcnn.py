@@ -213,7 +213,10 @@ class GCNN(nn.Module):
                         raise ValueError(f"Aggregation method {x} not implemented.")
 
                 # Update
-                lr_helper = self.node_level_nns[depth](lr_helper)
+                if self.train_args.shared_node_level_nns:
+                    lr_helper = self.node_level_nn(lr_helper)
+                else:  # separate node-level NNs per depth level
+                    lr_helper = self.node_level_nns[depth](lr_helper)
 
                 # Activation
                 lr_helper = self.activation_function(lr_helper)
