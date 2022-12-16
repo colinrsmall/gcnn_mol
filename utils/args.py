@@ -110,7 +110,7 @@ class TrainArgs(Tap):
     wandb_logging: bool = False
     """If passed, model training will be logged on wandb."""
 
-    learning_rate: int = 0.0003
+    learning_rate: float = 0.0003
     """Learning rate for Adam optimizer."""
 
     loss_function: Literal["mse", "mae"] = "mse"
