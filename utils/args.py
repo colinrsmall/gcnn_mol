@@ -113,6 +113,9 @@ class TrainArgs(Tap):
     learning_rate: float = 0.0003
     """Learning rate for Adam optimizer."""
 
+    weight_decay: float = 0
+    """Weight decay for Adam optimizer."""
+
     loss_function: Literal["mse", "mae"] = "mse"
     """Loss function used when training the model."""
 
