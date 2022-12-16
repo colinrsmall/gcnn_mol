@@ -21,7 +21,7 @@ class TrainArgs(Tap):
     hidden_size: int = 300
     """Hidden layer size of node-level NNs."""
 
-    activation_function: Literal["ReLU"] = "ReLU"
+    activation_function: Literal["ReLU", "PReLU", "SeLU", "leakyReLU"] = "ReLU"
     """Activation function for node-level NNs and readout FCNN."""
 
     readout_num_hidden_layers: int = 3
