@@ -47,7 +47,6 @@ parameters:
     value: True
   sgd_nesterov:
     value: True
-  l
 
 
 command:
