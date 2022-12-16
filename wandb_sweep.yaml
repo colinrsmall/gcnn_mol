@@ -14,7 +14,7 @@ parameters:
   depth:
     values: [2, 3, 4, 5]
   shared_node_level_nns:
-    value: [True, False]
+    values: [True, False]
   activation_function:
     values: ["ReLU", "PReLU", "SeLU", "leakyReLU"]
   learning_rate:
@@ -24,15 +24,15 @@ parameters:
   gradient_clipping_norm:
     values: [1, 2, 4]
   aggregation_method:
-    value: ["mean", "sum", "LAF"]
+    values: ["mean", "sum", "LAF"]
   explicit_hydrogens:
-    value: [False, True]
+    values: [False, True]
   graph_attention:
     value: False
   graph_attention_activation:
     value: False
   bias:
-    value: [False, True]
+    values: [False, True]
   epochs:
     value: 20
   sweep_config:
