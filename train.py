@@ -85,7 +85,7 @@ def train_model(train_args: TrainArgs):
         ).to(device)
 
     # Initiate model optimizer and loss function
-    optimizer = optim.Adam(m.parameters(), lr=0.0003)
+    optimizer = optim.Adam(m.parameters(), lr=train_args.learning_rate)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
 
     # Set loss function
