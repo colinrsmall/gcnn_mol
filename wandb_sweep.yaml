@@ -45,8 +45,6 @@ parameters:
     value: "all"
   wandb_logging:
     value: True
-  sgd_nesterov:
-    value: True
 
 
 command:
