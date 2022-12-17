@@ -2,7 +2,7 @@ import numpy as np
 import numpy.typing as npt
 import torch
 from rdkit.Chem.rdchem import Atom, Mol
-from rdkit.Chem import GetAdjacencyMatrix
+from rdkit.Chem import GetAdjacencyMatrix, rdmolops
 from rdkit.Chem import MolFromSmiles
 
 from data import atom_descriptors, molecule_descriptors
@@ -62,6 +62,10 @@ class MoleculeFeaturizer:
         # Return None if the molecule's SMILES string could not be parsed
         if mol is None:
             return None
+
+        # Add explicit hydrogens if desired
+        if self.data_args.explicit_hydrogens:
+            mol = rdmolops.AddHs(mol)
 
         # Generate adjacency matrix
         adjacency_matrix = GetAdjacencyMatrix(mol)
