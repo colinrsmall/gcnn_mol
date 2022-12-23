@@ -49,6 +49,8 @@ parameters:
     value: "all"
   wandb_logging:
     value: True
+  loss_function:
+    value: "mae"
 
 
 command:

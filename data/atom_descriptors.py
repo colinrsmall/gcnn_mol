@@ -256,7 +256,6 @@ def partial_charge(a) -> list[float]:
 # Contains discrete or categorical descriptors that should not be normalized.
 DISCRETE_DESCRIPTORS = {
     "atom_type": atom_type,
-    "valence": valence,
     "is_aromatic": is_aromatic,
     "num_hydrogens": num_hydrogens,
     "is_in_ring": is_in_ring,
@@ -273,6 +272,8 @@ CONTINUOUS_DESCRIPTORS = {
     "molar_refractivity_contrib": crippen_molar_refractivity_contrib,
     "total_polar_surface_area_contrib": tpsa_contrib,
     "total_labute_accessible_surface_area": labute_asa_contrib,
+    "valence": valence,
+    # "partial_charge": partial_charge,
 }
 
 
