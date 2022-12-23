@@ -106,9 +106,12 @@ class Dataset(data.Dataset):
         :param test_split_percentage: The size of the test split as a percentage of the total size of the dataset.
         :return: Two lists of datapoints corresponding to the training split and test split.
         """
-        train_set, test_set = train_test_split(
-            self.datapoints, test_size=test_split_percentage, random_state=self.data_args.seed
-        )
+        if self.data_args.seed:
+            train_set, test_set = train_test_split(
+                self.datapoints, test_size=test_split_percentage, random_state=self.data_args.seed
+            )
+        else:
+            train_set, test_set = train_test_split(self.datapoints, test_size=test_split_percentage)
         return train_set, test_set
 
 

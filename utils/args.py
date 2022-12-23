@@ -84,7 +84,7 @@ class TrainArgs(Tap):
 
     # ~~~ Misc. Training Args ~~~
 
-    seed: int = 1
+    seed: int = None
     """Seed used for torch and sklearn."""
 
     model_save_path: str = None

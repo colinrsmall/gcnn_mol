@@ -14,7 +14,8 @@ import yaml
 
 def train_model(train_args: TrainArgs):
     # Set pytorch seed
-    torch.manual_seed(train_args.seed)
+    if train_args.seed:
+        torch.manual_seed(train_args.seed)
 
     # Initialize wandb logging
     if train_args.wandb_logging:

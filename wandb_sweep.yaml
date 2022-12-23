@@ -14,7 +14,7 @@ parameters:
   depth:
     values: [4, 5, 6]
   shared_node_level_nns:
-    values: [True, False]
+    value: False
   activation_function:
     value: "SeLU"
   learning_rate:
@@ -26,11 +26,11 @@ parameters:
   aggregation_method:
     value: "mean"
   explicit_hydrogens:
-    values: [False, True]
+    value: True
   graph_attention:
     value: True
   graph_attention_activation:
-    values: ["sigmoid", "softmax"]
+    value: "sigmoid"
   bias:
     value: True
   epochs:
