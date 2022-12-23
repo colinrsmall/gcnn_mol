@@ -13,6 +13,8 @@ from data.atom_descriptors import get_features_to_normalize
 from data.featurizer import MoleculeFeaturizer
 from data.moldata import AbstractDatapoint, MultiMolDatapoint, SingleMolDatapoint
 
+from rdkit.Chem import rdPartialCharges
+
 
 class Dataset(data.Dataset):
     # TODO: Inherit from nn.Dataset (https://pytorch.org/tutorials/beginner/data_loading_tutorial.html)
@@ -31,6 +33,7 @@ class Dataset(data.Dataset):
         # Compute atom and mol feature vectors length by featurizing dummy atom and mol
         featurizer = MoleculeFeaturizer(train_args)
         mol = Chem.MolFromSmiles("CC")
+        rdPartialCharges.ComputeGasteigerCharges(mol)
         self.atom_features_vector_length = len(featurizer.create_descriptors_for_atom(mol.GetAtoms()[0]))
         self.mol_features_vector_length = len(featurizer.create_descriptors_for_molecule(mol))
 

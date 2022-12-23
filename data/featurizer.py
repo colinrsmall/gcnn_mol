@@ -2,7 +2,7 @@ import numpy as np
 import numpy.typing as npt
 import torch
 from rdkit.Chem.rdchem import Atom, Mol
-from rdkit.Chem import GetAdjacencyMatrix, rdmolops
+from rdkit.Chem import GetAdjacencyMatrix, rdmolops, rdPartialCharges
 from rdkit.Chem import MolFromSmiles
 
 from data import atom_descriptors, molecule_descriptors
@@ -18,6 +18,7 @@ class MoleculeFeaturizer:
 
         # Compute atom and mol feature vectors length by featurizing dummy atom and mol
         mol = MolFromSmiles("CC")
+        rdPartialCharges.ComputeGasteigerCharges(mol)
         self.atom_features_vector_length = len(self.create_descriptors_for_atom(mol.GetAtoms()[0]))
 
     def create_descriptors_for_atom(self, atom: Atom) -> (np.ndarray, np.ndarray):
@@ -84,6 +85,7 @@ class MoleculeFeaturizer:
         adjacency_matrix = torch.from_numpy(adjacency_matrix).to(torch.float32)
 
         # Generate atom features
+        rdPartialCharges.ComputeGasteigerCharges(mol)  # Needed to compute partial charges
         atom_feature_matrix = np.zeros((len(adjacency_matrix), self.atom_features_vector_length))
         atom_feature_matrix = torch.from_numpy(atom_feature_matrix).to(torch.float32)
 

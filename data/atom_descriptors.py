@@ -17,9 +17,10 @@ MAX_ATOMIC_NUM = 118
 # Maps certain atomic features values to their idx for one-hot encoding
 # Adapted from https://github.com/chemprop/chemprop/blob/98fc25eec8c57171c56d6ffad03ae1336c016e3b/chemprop/features/featurization.py#L174
 CATEGORICAL_FEATURE_VAL_TO_IDX = {
+    "atom_type": [""] * 11,
     "atomic_number": [""] * MAX_ATOMIC_NUM,
     "degree": [0, 1, 2, 3, 4, 5],
-    "formal_charge": [-1, -2, 1, 2, 0],
+    # "formal_charge": [-1, -2, 1, 2, 0],
     "num_hydrogens": [0, 1, 2, 3, 4],
     "hybridization": [
         Chem.rdchem.HybridizationType.SP,
@@ -83,6 +84,34 @@ def one_hot_encode(idx: int, max_values: int) -> list[bool]:
     return l
 
 
+def atom_type(a: Chem.rdchem.Atom) -> list[bool]:
+    def is_metal(num: int) -> bool:
+        return (
+            num == 3
+            or num == 4
+            or 11 <= num <= 13
+            or 19 <= num <= 31
+            or 37 <= num <= 50
+            or 55 <= num <= 84
+            or 87 <= num <= 116
+        )
+
+    n = a.GetAtomicNum()
+    return [
+        n == 1,
+        n == 6,
+        n == 7,
+        n == 8,
+        n == 9,
+        n == 15,
+        n == 16,
+        n == 17,
+        n == 35,
+        n == 53,
+        is_metal(n),
+    ]
+
+
 def atomic_number(a: Chem.rdchem.Atom) -> list[int]:
     """Atomic number of atom"""
 
@@ -139,11 +168,11 @@ def formal_charge(a: Chem.rdchem.Atom) -> list[bool]:
 
     charge = a.GetFormalCharge()
 
-    charge_idx = CATEGORICAL_FEATURE_VAL_TO_IDX["formal_charge"].index(charge)
-    possible_formal_charge_values = len(CATEGORICAL_FEATURE_VAL_TO_IDX["formal_charge"])
-    formal_charge_vec = one_hot_encode(charge_idx, possible_formal_charge_values)
+    # charge_idx = CATEGORICAL_FEATURE_VAL_TO_IDX["formal_charge"].index(charge)
+    # possible_formal_charge_values = len(CATEGORICAL_FEATURE_VAL_TO_IDX["formal_charge"])
+    # formal_charge_vec = one_hot_encode(charge_idx, possible_formal_charge_values)
 
-    return formal_charge_vec
+    return [charge]
 
 
 def is_aromatic(a: Chem.rdchem.Atom) -> list[bool]:
@@ -210,20 +239,6 @@ def labute_asa_contrib(a: Chem.rdchem.Atom) -> list[float]:
     return [rdMolDescriptors._CalcLabuteASAContribs(m)[0][idx]]
 
 
-# TODO: Fix, doesn't work right now
-# def gasteiger_charge(a, force_calc=False) -> list[float]:
-#
-#     """Hacky way of getting gasteiger charge"""
-#
-#     res = a.GetPropsAsDict()["_GasteigerCharge"]
-#     if res and not force_calc:
-#         return [float(res)]
-#     else:
-#         m = a.GetOwningMol()
-#         rdPartialCharges.ComputeGasteigerCharges(m)
-#         return [float(a.props["_GasteigerCharge"])]
-
-
 def hybridization(a) -> list[bool]:
 
     """Hybridized as type hybrid_type, default SP3"""
@@ -234,10 +249,13 @@ def hybridization(a) -> list[bool]:
     ]
 
 
+def partial_charge(a) -> list[float]:
+    return [float(a.GetProp("_GasteigerCharge"))]
+
+
 # Contains discrete or categorical descriptors that should not be normalized.
 DISCRETE_DESCRIPTORS = {
-    "atomic_number": atomic_number,
-    "formal_charge": formal_charge,
+    "atom_type": atom_type,
     "valence": valence,
     "is_aromatic": is_aromatic,
     "num_hydrogens": num_hydrogens,
@@ -245,6 +263,7 @@ DISCRETE_DESCRIPTORS = {
     "is_h_acceptor": is_h_acceptor,
     "is_h_donor": is_h_donor,
     "is_heteroatom": is_hetero,
+    "hybridization": hybridization,
 }
 
 # Contains continuous descriptors that should be normalized.
