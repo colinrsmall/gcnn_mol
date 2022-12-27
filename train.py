@@ -160,7 +160,7 @@ def train_model(train_args: TrainArgs):
             nn.utils.clip_grad_norm_(m.parameters(), train_args.gradient_clipping_norm)
             optimizer.step()
 
-        scheduler.step()
+        # scheduler.step()
 
         # Calculate training set metrics
         for metric in train_args.metrics:
