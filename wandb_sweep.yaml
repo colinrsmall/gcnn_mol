@@ -22,15 +22,15 @@ parameters:
   gradient_clipping_norm:
     value: 4
   aggregation_method:
-    value: ["mean", "sum"]
+    values: ["mean", "sum"]
   explicit_hydrogens:
-    value: [True, False]
+    values: [True, False]
   graph_attention:
-    value: [True, False]
+    values: [True, False]
   graph_attention_activation:
     value: "sigmoid"
   bias:
-    value: [True, False]
+    values: [True, False]
   epochs:
     value: 30
   sweep_config:
@@ -48,7 +48,7 @@ parameters:
   wandb_logging:
     value: True
   loss_function:
-    value: ["mae", "rmse"]
+    values: ["mae", "rmse"]
   optimizer:
     values: ["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"]
 
