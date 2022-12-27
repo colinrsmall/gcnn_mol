@@ -48,7 +48,7 @@ parameters:
   wandb_logging:
     value: True
   loss_function:
-    values: ["mae", "rmse"]
+    values: ["mae", "mse"]
   optimizer:
     values: ["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"]
 
