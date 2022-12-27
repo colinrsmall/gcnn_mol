@@ -113,9 +113,6 @@ class TrainArgs(Tap):
     learning_rate: float = 0.0003
     """Learning rate for Adam optimizer."""
 
-    weight_decay: float = 0
-    """Weight decay for Adam optimizer."""
-
     loss_function: Literal["mse", "mae"] = "mse"
     """Loss function used when training the model."""
 
@@ -130,6 +127,12 @@ class TrainArgs(Tap):
 
     gradient_clipping_norm: int = 1
     """Gradient clipping cutoff value."""
+
+    optimizer: Literal["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"] = "sgd"
+    """Which optimizer to use while training the model."""
+
+    # scheduler: str = ["none", "cosine_10", "cosine_5", "cosine_15", "noam"]
+    # """Which learning rate scheduler to use"""
 
     def process_args(self) -> None:
         """

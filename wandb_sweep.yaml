@@ -10,31 +10,29 @@ parameters:
   dropout_probability:
     value: 0.3
   hidden_size:
-    values: [512, 768, 1024]
+    values: [512, 768, 1024, 1280]
   depth:
-    values: [4, 5, 6]
+    values: [4, 5, 6, 7]
   shared_node_level_nns:
     value: False
   activation_function:
-    value: "SeLU"
+    values: ["ReLU", "PReLU", "SeLU", "leakyReLU"]
   learning_rate:
     value: 0.0001
-  weight_decay:
-    value: 1e-6
   gradient_clipping_norm:
     value: 4
   aggregation_method:
-    value: "mean"
+    value: ["mean", "sum"]
   explicit_hydrogens:
-    value: True
+    value: [True, False]
   graph_attention:
-    value: True
+    value: [True, False]
   graph_attention_activation:
     value: "sigmoid"
   bias:
-    value: True
+    value: [True, False]
   epochs:
-    value: 20
+    value: 30
   sweep_config:
     value: "/users/crsmall/research/gcnn_mol/wandb_sweep.yaml"
   dataset_path:
@@ -50,7 +48,9 @@ parameters:
   wandb_logging:
     value: True
   loss_function:
-    value: "mae"
+    value: ["mae", "rmse"]
+  optimizer:
+    values: ["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"]
 
 
 command:

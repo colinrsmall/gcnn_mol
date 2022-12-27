@@ -85,9 +85,34 @@ def train_model(train_args: TrainArgs):
             device,
         ).to(device)
 
-    # Initiate model optimizer and loss function
-    optimizer = optim.AdamW(m.parameters(), lr=train_args.learning_rate, weight_decay=train_args.weight_decay)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
+    # Initiate model optimizer
+    match train_args.optimizer:
+        case "adam":
+            optimizer = optim.AdamW(m.parameters(), lr=train_args.learning_rate)
+        case "sgd":
+            optimizer = optim.SGD(m.parameters(), lr=train_args.learning_rate)
+        case "adagrad":
+            optimizer = optim.Adagrad(m.parameters(), lr=train_args.learning_rate)
+        case "adadelta":
+            optimizer = optim.Adadelta(m.parameters(), lr=train_args.learning_rate)
+        case "sgd_nesterov":
+            optimizer = optim.SGD(m.parameters(), lr=train_args.learning_rate, nesterov=True)
+        case "adamw":
+            optimizer = optim.AdamW(m.parameters(), lr=train_args.learning_rate)
+        case x:
+            raise ValueError(f"Optimizer {x} not implemented.")
+
+    # Initialize model lr scheduler
+    # scheduler = None
+    # match train_args.scheduler:
+    #     case "cosine_10":
+    #         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
+    #     case "cosine_15":
+    #         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=15)
+    #     case "cosine_5":
+    #         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
+    #     case "noam":
+    #         scheduler = utils.NoamOpt()
 
     # Set loss function
     match train_args.loss_function:

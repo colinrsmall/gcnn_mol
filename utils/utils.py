@@ -62,11 +62,10 @@ class NoamOpt:
     https://nlp.seas.harvard.edu/2018/04/03/attention.html#optimizer
     """
 
-    def __init__(self, model_size, warmup, optimizer):
+    def __init__(self, warmup, optimizer):
         self.optimizer = optimizer
         self._step = 0
         self.warmup = warmup
-        self.model_size = model_size
         self._rate = 0
 
     def state_dict(self):
