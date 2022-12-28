@@ -194,7 +194,7 @@ class GCNN(nn.Module):
                     case "mean":
                         lr_helper = (
                             torch.mm(attentive_adjacency_matrix, lr_helper).T
-                            / torch.sum(attentive_adjacency_matrix, dim=1)
+                            / torch.sum(adjacency_matrix, dim=1)
                         ).T
                     case "sum":
                         lr_helper = torch.mm(attentive_adjacency_matrix, lr_helper)
