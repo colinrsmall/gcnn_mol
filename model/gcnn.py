@@ -170,22 +170,21 @@ class GCNN(nn.Module):
             for depth in range(self.train_args.depth):
                 # Graph attention
                 if self.train_args.graph_attention:
-                    # Create copy of adjacency matrix that will be scaled via attention
-                    attentive_adjacency_matrix = torch.clone(adjacency_matrix)
-                    # Calculate attention for each atom
-                    for atom_idx in range(len(adjacency_matrix)):
-                        # Get indices in adjacency matrix of the current atom's neighbors
-                        neighbor_indices = torch.where(adjacency_matrix[atom_idx] > 0)
-                        neighbors = lr_helper[neighbor_indices]
-                        # Run a batch of neighbor-centroid atom pairs through the attention layer
-                        attention_vector = self.graph_attention(
-                            torch.concat([neighbors, torch.stack([lr_helper[atom_idx]] * len(neighbors))], dim=1)
-                        )
-                        attention_vector = self.attention_activation(attention_vector)
-                        # Scale the adjacency matrix by the calculated attentions
-                        attentive_adjacency_matrix[atom_idx, neighbor_indices[0]] = attentive_adjacency_matrix[
-                            atom_idx, neighbor_indices[0]
-                        ] * attention_vector.view(-1)
+                    neighbor_batch = torch.zeros(
+                        (adjacency_matrix.shape[0], adjacency_matrix.shape[1], lr_helper.shape[1] * 2),
+                        device=lr_helper.device,
+                    )
+                    for centroid_atom in range(adjacency_matrix.shape[0]):
+                        centroid_features = lr_helper[centroid_atom]
+                        for neighbor_atom in range(adjacency_matrix.shape[1]):
+                            neighbor_features = lr_helper[neighbor_atom]
+                            neighbor_batch[centroid_atom][neighbor_atom] = torch.concat(
+                                (centroid_features, neighbor_features), dim=0
+                            )
+                    # Run a batch of neighbor-centroid atom pairs through the attention layer
+                    attention_tensor = torch.squeeze(self.graph_attention(neighbor_batch))
+                    attention_tensor = self.attention_activation(attention_tensor)
+                    attentive_adjacency_matrix = torch.multiply(adjacency_matrix, attention_tensor)
                 else:
                     attentive_adjacency_matrix = adjacency_matrix
 
@@ -193,8 +192,7 @@ class GCNN(nn.Module):
                 match self.train_args.aggregation_method:
                     case "mean":
                         lr_helper = (
-                            torch.mm(attentive_adjacency_matrix, lr_helper).T
-                            / torch.sum(adjacency_matrix, dim=1)
+                            torch.mm(attentive_adjacency_matrix, lr_helper).T / torch.sum(adjacency_matrix, dim=1)
                         ).T
                     case "sum":
                         lr_helper = torch.mm(attentive_adjacency_matrix, lr_helper)
