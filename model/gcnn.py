@@ -170,19 +170,21 @@ class GCNN(nn.Module):
             for depth in range(self.train_args.depth):
                 # Graph attention
                 if self.train_args.graph_attention:
-                    neighbor_batch = torch.zeros(
-                        (adjacency_matrix.shape[0], adjacency_matrix.shape[1], lr_helper.shape[1] * 2),
-                        device=lr_helper.device,
+                    # Creates centroid-neighbor atom pair feature tensors
+                    number_of_atoms = adjacency_matrix.shape[0]
+                    lr_helper_expanded = lr_helper.expand(number_of_atoms, -1, -1)
+                    neighbor_batch = torch.concat(
+                        (
+                            lr_helper_expanded.swapaxes(0, 1),
+                            lr_helper_expanded,
+                        ),
+                        dim=2,
                     )
-                    for centroid_atom in range(adjacency_matrix.shape[0]):
-                        centroid_features = lr_helper[centroid_atom].repeat(adjacency_matrix.shape[1], 1)
-                        neighbor_features = torch.concat((centroid_features, lr_helper), dim=1)
-                        neighbor_batch[centroid_atom] = neighbor_features
 
                     # Run a batch of neighbor-centroid atom pairs through the attention layer
                     attention_tensor = torch.squeeze(self.graph_attention(neighbor_batch))
                     attention_tensor = self.attention_activation(attention_tensor)
-                    attentive_adjacency_matrix = torch.multiply(adjacency_matrix, attention_tensor)
+                    attentive_adjacency_matrix = torch.where(adjacency_matrix > 0, attention_tensor, 0)
                 else:
                     attentive_adjacency_matrix = adjacency_matrix
 
