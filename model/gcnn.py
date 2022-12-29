@@ -175,12 +175,10 @@ class GCNN(nn.Module):
                         device=lr_helper.device,
                     )
                     for centroid_atom in range(adjacency_matrix.shape[0]):
-                        centroid_features = lr_helper[centroid_atom]
-                        for neighbor_atom in range(adjacency_matrix.shape[1]):
-                            neighbor_features = lr_helper[neighbor_atom]
-                            neighbor_batch[centroid_atom][neighbor_atom] = torch.concat(
-                                (centroid_features, neighbor_features), dim=0
-                            )
+                        centroid_features = lr_helper[centroid_atom].repeat(adjacency_matrix.shape[1], 1)
+                        neighbor_features = torch.concat((centroid_features, lr_helper), dim=1)
+                        neighbor_batch[centroid_atom] = neighbor_features
+
                     # Run a batch of neighbor-centroid atom pairs through the attention layer
                     attention_tensor = torch.squeeze(self.graph_attention(neighbor_batch))
                     attention_tensor = self.attention_activation(attention_tensor)
