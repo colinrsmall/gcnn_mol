@@ -18,7 +18,9 @@ parameters:
   activation_function:
     values: ["ReLU", "PReLU", "SeLU", "leakyReLU"]
   learning_rate:
-    value: 0.0001
+    distribution: uniform
+    min: 0
+    max: 0.01
   gradient_clipping_norm:
     value: 4
   aggregation_method:
@@ -32,7 +34,7 @@ parameters:
   bias:
     values: [True, False]
   epochs:
-    value: 30
+    value: 100
   sweep_config:
     value: "/users/crsmall/research/gcnn_mol/wandb_sweep.yaml"
   dataset_path:
