@@ -76,7 +76,7 @@ class TrainArgs(Tap):
     number_of_molecules: int
     """The number of molecules per datapoint"""
 
-    molecule_smiles_columns: list[str]
+    molecule_smiles_columns: str
     """The names of the columns in the dataset that hold each molecules' SMILES string."""
 
     target_column: str
@@ -150,6 +150,9 @@ class TrainArgs(Tap):
         # Set readout hidden size if not dps
         if not self.readout_hidden_size:
             self.readout_hidden_size = self.hidden_size
+
+        # Parse and split molecule smiles columns
+        self.molecule_smiles_columns = self.molecule_smiles_columns.split(",")
 
         # Ensure number of molecules matches the number of molecule smiles columns
         if self.number_of_molecules != len(self.molecule_smiles_columns):
