@@ -38,13 +38,13 @@ parameters:
   sweep_config:
     value: "/users/crsmall/research/gcnn_mol/wandb_sweep.yaml"
   dataset_path:
-    value: "/users/crsmall/research/data/input/Lipophilicity.csv"
+    value: "/users/crsmall/research/data/input/kulesa_training_data.csv"
   number_of_molecules:
-    value: 1
+    value: 2
   molecule_smiles_columns:
-    value: "smiles"
+    value: "Compound 1 SMILES,Compound 2 SMILES"
   target_column:
-    value: "exp"
+    value: "bliss"
   metrics:
     value: "all"
   wandb_logging:
