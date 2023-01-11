@@ -28,7 +28,8 @@ pairs of antibiotics.
   - [x] Max
   - [x] Min
   - [x] LAF https://arxiv.org/abs/2012.08482
-- [ ] Graph attention mechanism
+- [x] Graph attention mechanism
+- [ ] Change train/test split function to work differently for Kulesa et al. data (split data within each common antibiotic type so that e.g. 60% of all vancomycin, cyclosporine, etc. combinations are in the train set and 40% are in the test set)
 - [ ] Motif/subgraph attention
 - [ ] Co-attention
 - [ ] Motif/subgraph co-attention
