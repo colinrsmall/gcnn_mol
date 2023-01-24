@@ -131,8 +131,8 @@ class TrainArgs(Tap):
     optimizer: Literal["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"] = "sgd"
     """Which optimizer to use while training the model."""
 
-    # scheduler: str = ["none", "cosine_10", "cosine_5", "cosine_15", "noam"]
-    # """Which learning rate scheduler to use"""
+    co_attention: bool = False
+    """If passed, model uses co-attention with multi-molecule datapoints."""
 
     def process_args(self) -> None:
         """
@@ -189,3 +189,7 @@ class TrainArgs(Tap):
         # Set model save name to the current datetime stamp if no model name is provided
         if self.model_save_name is None:
             self.model_save_name = f"gcnn_mol_trained_{str(datetime.now())}"
+
+        # Raise error if user tries to use co-attention without using a multi-molecule dataset
+        if self.number_of_molecules == 1 and self.co_attention:
+            raise ValueError("Co-attention can only be used with datasets with multi-molecule datapoints.")

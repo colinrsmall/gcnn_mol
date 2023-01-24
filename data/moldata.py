@@ -80,3 +80,30 @@ class MultiMolDatapoint(AbstractDatapoint):
             self.atom_feature_matrices[i] = self.atom_feature_matrices[i].to(device)
             self.molecule_feature_vectors[i] = self.molecule_feature_vectors[i].to(device)
         # self.target.to(device)
+
+    def create_paired_datapoints(self) -> None:
+        """
+        Creates new adjacency matrices and feature matrices for each molecule in the datapoint that include those of the
+        other molecule(s) in the datapoint. Used for co-attention.
+        Currently only supports datapoints with two molecules in them.
+        """
+        mol_1_size = self.adjacency_matrices[0].size()[0]
+        mol_2_size = self.adjacency_matrices[1].size()[0]
+        default_connection_value = 0.1
+
+        # Create adjacency matrix and atom matrix for molecule 1
+        mol_1_padded_adjacency = torch.nn.functional.pad(
+            self.adjacency_matrices[0], (0, mol_2_size, 0, mol_2_size), "constant", default_connection_value
+        )
+        mol_1_padded_atom_features = torch.concat((self.atom_feature_matrices[0], self.atom_feature_matrices[1]))
+        mol_1_padded_adjacency[mol_1_size:, mol_1_size:] = self.adjacency_matrices[1]
+
+        # Create adjacency matrix and atom matrix for molecule 2
+        mol_2_padded_adjacency = torch.nn.functional.pad(
+            self.adjacency_matrices[1], (0, mol_1_size, 0, mol_1_size), "constant", default_connection_value
+        )
+        mol_2_padded_atom_features = torch.concat((self.atom_feature_matrices[1], self.atom_feature_matrices[0]))
+        mol_2_padded_adjacency[mol_2_size:, mol_2_size:] = self.adjacency_matrices[0]
+
+        self.adjacency_matrices = [mol_1_padded_adjacency, mol_2_padded_adjacency]
+        self.atom_feature_matrices = [mol_1_padded_atom_features, mol_2_padded_atom_features]

@@ -93,6 +93,10 @@ class Dataset(data.Dataset):
         for dp in self.datapoints:
             dp.to(device)
 
+    def create_paired_datapoints(self) -> None:
+        for dp in self.datapoints:
+            dp.create_paired_datapoints()
+
     def __len__(self) -> int:
         return len(self.datapoints)
 

@@ -66,6 +66,10 @@ def train_model(train_args: TrainArgs):
     # Move dateset to detected device
     dataset.to(device)
 
+    # Create paired datapoints for the dataset if using co-attention
+    if train_args.co_attention:
+        dataset.create_paired_datapoints()
+
     # Split data in to training and test set
     train_set, test_set = dataset.train_test_split(0.2)
 
@@ -174,7 +178,7 @@ def train_model(train_args: TrainArgs):
         for datapoint in tqdm(test_set, desc="Test set:", leave=False, total=len(test_set)):
             # Forward pass of model
             output = m.forward(datapoint)
-            test_outputs.append(output.detach().cpu().numpy())
+            test_outputs.append(output.detach().cpu().numpy()[0])
 
         # Calculate test set metrics
         for metric in train_args.metrics:
