@@ -19,7 +19,7 @@ parameters:
     values: ["ReLU", "PReLU", "SeLU", "leakyReLU"]
   learning_rate:
     distribution: uniform
-    min: 0
+    min: 0.000001
     max: 0.01
   gradient_clipping_norm:
     value: 4
@@ -36,7 +36,7 @@ parameters:
   epochs:
     value: 100
   sweep_config:
-    value: "/users/crsmall/research/gcnn_mol/wandb_sweep.yaml"
+    value: "/users/crsmall/research/gcnn_mol/kulesa_sweep.yaml"
   dataset_path:
     value: "/users/crsmall/research/data/input/kulesa_training_data.csv"
   number_of_molecules:
