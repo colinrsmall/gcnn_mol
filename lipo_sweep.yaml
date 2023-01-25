@@ -38,7 +38,7 @@ parameters:
   sweep_config:
     value: "/users/crsmall/research/gcnn_mol/lipo_sweep.yaml"
   dataset_path:
-    value: "/users/crsmall/research/data/input/Lipophilicity.csv.csv"
+    value: "/users/crsmall/research/data/input/Lipophilicity.csv"
   number_of_molecules:
     value: 1
   molecule_smiles_columns:
