@@ -53,7 +53,7 @@ parameters:
     values: ["mae", "mse"]
   optimizer:
     values: ["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"]
-  co-attention:
+  co_attention:
     values: [True, False]
 
 
