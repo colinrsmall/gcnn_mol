@@ -89,7 +89,7 @@ class MultiMolDatapoint(AbstractDatapoint):
         """
         mol_1_size = self.adjacency_matrices[0].size()[0]
         mol_2_size = self.adjacency_matrices[1].size()[0]
-        default_connection_value = 0.1
+        default_connection_value = 0.5
 
         # Create adjacency matrix and atom matrix for molecule 1
         mol_1_padded_adjacency = torch.nn.functional.pad(
