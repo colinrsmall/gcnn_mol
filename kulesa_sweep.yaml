@@ -14,7 +14,7 @@ parameters:
   depth:
     value: 5
   shared_node_level_nns:
-        values: [True, False]
+    values: [True, False]
   activation_function:
     value: "leakyReLU"
   learning_rate:
@@ -48,7 +48,7 @@ parameters:
   wandb_logging:
     value: True
   loss_function:
-    values: "mae"
+    value: "mae"
   optimizer:
     value: "adadelta"
   co_attention:

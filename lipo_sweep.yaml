@@ -48,7 +48,7 @@ parameters:
   wandb_logging:
     value: True
   loss_function:
-    values: "mae"
+    value: "mae"
   optimizer:
     value: "adagrad"
   co-attention:
