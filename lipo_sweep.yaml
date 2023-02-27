@@ -51,8 +51,6 @@ parameters:
     value: "mae"
   optimizer:
     value: "adagrad"
-  co-attention:
-    values: [True, False]
 
 
 command:
