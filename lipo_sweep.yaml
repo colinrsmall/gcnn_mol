@@ -1,12 +1,12 @@
 program: /users/crsmall/research/gcnn_mol/gcnn_mol.py
 
-method: bayes
-
-metric:
-  goal: minimize
-  name: test_rmse
+method: random
 
 parameters:
+  seed:
+    distribution: int_uniform
+    min: 0
+    max: 100
   dropout_probability:
     value: [0.3, 0.4, 0.5]
   hidden_size:
