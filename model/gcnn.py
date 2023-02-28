@@ -79,7 +79,10 @@ class GCNN(nn.Module):
 
         # Build graph attention mechanism
         if train_args.graph_attention:
-            self.graph_attention = nn.Linear(train_args.hidden_size * 2, 1, train_args.bias, device=device)
+            self.graph_attention_1 = nn.Linear(
+                train_args.hidden_size * 2, train_args.hidden_size * 2, train_args.bias, device=device
+            )
+            self.graph_attention_2 = nn.Linear(train_args.hidden_size * 2, 1, train_args.bias, device=device)
             match train_args.graph_attention_activation:
                 case "softmax":
                     self.attention_activation = nn.Softmax(dim=1)
@@ -181,7 +184,7 @@ class GCNN(nn.Module):
                     )
 
                     # Run a batch of neighbor-centroid atom pairs through the attention layer
-                    attention_tensor = torch.squeeze(self.graph_attention(neighbor_batch))
+                    attention_tensor = torch.squeeze(self.graph_attention_2(self.graph_attention_1(neighbor_batch)))
                     attention_tensor = self.attention_activation(attention_tensor)
                     attentive_adjacency_matrix = torch.where(adjacency_matrix > 0, attention_tensor, 0)
                 else:
