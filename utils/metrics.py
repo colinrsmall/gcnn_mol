@@ -1,4 +1,4 @@
-from scipy.stats import kendalltau, spearmanr
+from scipy.stats import kendalltau, spearmanr, pearsonr
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
@@ -20,6 +20,19 @@ def kendall(outputs: list[float], targets: list[float]) -> float:
     :return: Kendall's Tau Ranked Correlation between the outputs and targets.
     """
     return kendalltau(outputs, targets)[0]
+
+
+def pearson(outputs: list[float], targets: list[float]) -> float:
+    """
+    Returns the pearson correlation between a list of model outputs and a list of targets.
+    :param outputs: A list of floats of values outputted by the model.
+    :param targets: A lis of floats of targets of the model's training.
+    :return: Kendall's Tau Ranked Correlation between the outputs and targets.
+    """
+    try:
+        return pearsonr([o[0] for o in outputs], targets)[0]
+    except Exception:
+        return pearsonr(outputs, targets)[0]
 
 
 def mse(outputs: list[float], targets: list[float]) -> float:
@@ -61,6 +74,7 @@ def all_metrics():
         "mse": mse,
         "mae": mae,
         "rmse": rmse,
+        "pearson": pearson,
     }
 
     return metrics
