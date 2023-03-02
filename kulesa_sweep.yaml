@@ -18,11 +18,11 @@ parameters:
   activation_function:
     value: "leakyReLU"
   learning_rate:
-    value: 0.002
+    values: [0.002, 0.003, 0.004, 0.005]
   gradient_clipping_norm:
     value: 4
   aggregation_method:
-    values: ["sum", "mean"]
+    values: ["sum", "mean", "LAF"]
   explicit_hydrogens:
     values: [True, False]
   graph_attention:
