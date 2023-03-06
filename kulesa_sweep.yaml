@@ -32,7 +32,7 @@ parameters:
   bias:
     value: True
   epochs:
-    value: 100
+    value: 150
   sweep_config:
     value: "/users/crsmall/research/gcnn_mol/kulesa_sweep.yaml"
   dataset_path:
