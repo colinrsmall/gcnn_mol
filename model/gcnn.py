@@ -184,7 +184,7 @@ class GCNN(nn.Module):
                     )
 
                     # Run a batch of neighbor-centroid atom pairs through the attention layer
-                    attention_tensor = torch.squeeze(self.graph_attention_2(self.graph_attention_1(neighbor_batch)))
+                    attention_tensor = torch.squeeze(self.graph_attention_1(neighbor_batch))
                     attention_tensor = self.attention_activation(attention_tensor)
                     attentive_adjacency_matrix = torch.where(adjacency_matrix > 0, attention_tensor, 0)
                 else:
