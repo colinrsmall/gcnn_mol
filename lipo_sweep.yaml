@@ -51,7 +51,8 @@ parameters:
     value: "mae"
   optimizer:
     value: "adagrad"
-
+  update_before_aggregation:
+    values: [True, False]
 
 command:
   - ${env}

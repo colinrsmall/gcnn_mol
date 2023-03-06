@@ -190,6 +190,13 @@ class GCNN(nn.Module):
                 else:
                     attentive_adjacency_matrix = adjacency_matrix
 
+                # Update before aggregation if desired
+                if self.train_args.update_before_aggregation:
+                    if self.train_args.shared_node_level_nns:
+                        lr_helper = self.node_level_nn(lr_helper)
+                    else:  # separate node-level NNs per depth level
+                        lr_helper = self.node_level_nns[depth](lr_helper)
+
                 # Aggregation
                 match self.train_args.aggregation_method:
                     case "mean":
@@ -212,11 +219,12 @@ class GCNN(nn.Module):
                     case x:
                         raise ValueError(f"Aggregation method {x} not implemented.")
 
-                # Update
-                if self.train_args.shared_node_level_nns:
-                    lr_helper = self.node_level_nn(lr_helper)
-                else:  # separate node-level NNs per depth level
-                    lr_helper = self.node_level_nns[depth](lr_helper)
+                # Update after aggregation by default
+                if not self.train_args.update_before_aggregation:
+                    if self.train_args.shared_node_level_nns:
+                        lr_helper = self.node_level_nn(lr_helper)
+                    else:  # separate node-level NNs per depth level
+                        lr_helper = self.node_level_nns[depth](lr_helper)
 
                 # Activation
                 lr_helper = self.activation_function(lr_helper)

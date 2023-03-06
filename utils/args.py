@@ -134,6 +134,9 @@ class TrainArgs(Tap):
     co_attention: bool = False
     """If passed, model uses co-attention with multi-molecule datapoints."""
 
+    update_before_aggregation: bool = False
+    """If passed, the feature vectors/latent representations of the molecules are updated before aggregation."""
+
     def process_args(self) -> None:
         """
         Checks that argument choices are valid.

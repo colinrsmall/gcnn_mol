@@ -53,6 +53,8 @@ parameters:
     value: "adadelta"
   co_attention:
     values: [True, False]
+  update_before_aggregation:
+    values: [True, False]
 
 
 command:
