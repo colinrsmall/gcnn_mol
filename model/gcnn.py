@@ -157,7 +157,7 @@ class GCNN(nn.Module):
                     else:  # separate node-level NNs per depth level
                         lr_helper = self.node_level_atom_nns[depth](lr_helper)
                     # Activation
-                        lr_helper = self.activation_function(lr_helper)
+                    lr_helper = self.activation_function(lr_helper)
                     # Dropout
                     if self.train_args.node_level_dropout:
                         lr_helper = self.dropout(lr_helper)
