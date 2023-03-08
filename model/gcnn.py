@@ -10,59 +10,6 @@ from data.moldata import MultiMolDatapoint, SingleMolDatapoint
 from model.laf_layer import LAFLayerFast
 
 
-class FCNNOnly(nn.Module):
-    def __init__(self, train_args: TrainArgs, mol_feature_vector_length: int, number_of_molecules: int):
-        super().__init__()
-
-        self.train_args = train_args
-        self.mol_feature_vector_length = mol_feature_vector_length
-        self.number_of_molecules = number_of_molecules
-
-        # Build readout layer
-        self.readout_hidden_nns = []
-
-        readout_input_size = mol_feature_vector_length * number_of_molecules
-        self.readout_input_layer = nn.Linear(readout_input_size, train_args.readout_hidden_size, train_args.bias)
-
-        for depth in range(train_args.readout_num_hidden_layers):
-            self.readout_hidden_nns.append(
-                nn.Linear(train_args.readout_hidden_size, train_args.readout_hidden_size, train_args.bias)
-            )
-
-        self.readout_output_layer = nn.Linear(train_args.readout_hidden_size, 1, train_args.bias)
-
-        # Set dropout layer if using
-        if train_args.node_level_dropout or train_args.readout_dropout:
-            if train_args.dropout_probability != 0.0:
-                self.dropout = nn.Dropout(train_args.dropout_probability)
-            else:
-                self.dropout = nn.Dropout()
-
-        # Set activation function
-        match train_args.activation_function:
-            case "ReLU":
-                self.activation_function = nn.ReLU()
-            case _:
-                raise ValueError(f"{self.activation}")
-
-    def forward(self, datapoint: Union[SingleMolDatapoint, MultiMolDatapoint]):
-        # Load and concat molecule features, if needed
-        if self.number_of_molecules == 1:
-            mol_features = datapoint.molecule_features_vector
-        else:
-            mol_features = torch.concat(datapoint.molecule_feature_vectors)
-
-        # FNN
-        latent_representation = self.readout_input_layer(mol_features)
-
-        for depth in range(self.train_args.depth):
-            latent_representation = self.readout_hidden_nns[depth](latent_representation)
-
-        output = self.readout_output_layer(latent_representation)
-
-        return output
-
-
 class GCNN(nn.Module):
     def __init__(
         self,
@@ -89,19 +36,34 @@ class GCNN(nn.Module):
                     raise ValueError(f"Graph attention activation {x} not implemented.")
 
         # Build input layer
-        self.input_node_level_nn = nn.Linear(
+        self.input_node_level_atom_nn = nn.Linear(
             atom_feature_vector_length, train_args.hidden_size, train_args.bias, device=device
         )
 
-        # Build node-level NNs
+        # 21 is the size of the one-hot encoded bond feature vector
+        self.input_node_level_bond_nn = nn.Linear(21, train_args.hidden_size, train_args.bias, device=device)
+
+        # Build node-level atom-feature NNs
         if train_args.shared_node_level_nns:
-            self.node_level_nn = nn.Linear(
+            self.node_level_atom_nn = nn.Linear(
                 train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device
             )
-        else:  # separate node-level NNs per depth level
-            self.node_level_nns = []
+        else:  # separate node-level atom-feature NNs per depth level
+            self.node_level_atom_nns = []
             for depth in range(train_args.depth):
-                self.node_level_nns.append(
+                self.node_level_atom_nns.append(
+                    nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device)
+                )
+
+        # Build node-level bond-feature NNs
+        if train_args.shared_node_level_nns:
+            self.node_level_bond_nn = nn.Linear(
+                train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device
+            )
+        else:  # separate node-level bond-feature NNs per depth level
+            self.node_level_bond_nns = []
+            for depth in range(train_args.depth):
+                self.node_level_bond_nns.append(
                     nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device)
                 )
 
@@ -163,7 +125,8 @@ class GCNN(nn.Module):
 
             # Input
             # lr_helper = latent representation of helper function
-            lr_helper = self.input_node_level_nn(atom_feature_matrix)
+            lr_helper = self.input_node_level_atom_nn(atom_feature_matrix)
+            lr_helper = self.activation_function(lr_helper)
 
             # Message passing
             for depth in range(self.train_args.depth):
@@ -190,9 +153,9 @@ class GCNN(nn.Module):
                 # Update before aggregation if desired
                 if self.train_args.update_before_aggregation:
                     if self.train_args.shared_node_level_nns:
-                        lr_helper = self.node_level_nn(lr_helper)
+                        lr_helper = self.node_level_atom_nn(lr_helper)
                     else:  # separate node-level NNs per depth level
-                        lr_helper = self.node_level_nns[depth](lr_helper)
+                        lr_helper = self.node_level_atom_nns[depth](lr_helper)
 
                 # Aggregation
                 match self.train_args.aggregation_method:
@@ -219,9 +182,9 @@ class GCNN(nn.Module):
                 # Update after aggregation by default
                 if not self.train_args.update_before_aggregation:
                     if self.train_args.shared_node_level_nns:
-                        lr_helper = self.node_level_nn(lr_helper)
+                        lr_helper = self.node_level_atom_nn(lr_helper)
                     else:  # separate node-level NNs per depth level
-                        lr_helper = self.node_level_nns[depth](lr_helper)
+                        lr_helper = self.node_level_atom_nns[depth](lr_helper)
 
                 # Activation
                 lr_helper = self.activation_function(lr_helper)
