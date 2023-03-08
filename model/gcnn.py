@@ -156,6 +156,11 @@ class GCNN(nn.Module):
                         lr_helper = self.node_level_atom_nn(lr_helper)
                     else:  # separate node-level NNs per depth level
                         lr_helper = self.node_level_atom_nns[depth](lr_helper)
+                    # Activation
+                        lr_helper = self.activation_function(lr_helper)
+                    # Dropout
+                    if self.train_args.node_level_dropout:
+                        lr_helper = self.dropout(lr_helper)
 
                 # Aggregation
                 match self.train_args.aggregation_method:
@@ -185,13 +190,11 @@ class GCNN(nn.Module):
                         lr_helper = self.node_level_atom_nn(lr_helper)
                     else:  # separate node-level NNs per depth level
                         lr_helper = self.node_level_atom_nns[depth](lr_helper)
-
-                # Activation
-                lr_helper = self.activation_function(lr_helper)
-
-                # Dropout
-                if self.train_args.node_level_dropout:
-                    lr_helper = self.dropout(lr_helper)
+                    # Activation
+                    lr_helper = self.activation_function(lr_helper)
+                    # Dropout
+                    if self.train_args.node_level_dropout:
+                        lr_helper = self.dropout(lr_helper)
 
             # Readout aggregation
             match self.train_args.aggregation_method:
