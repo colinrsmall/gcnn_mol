@@ -28,6 +28,7 @@ class SingleMolDatapoint(AbstractDatapoint):
         smiles: str,
         adjacency_matrix: torch.Tensor,
         atom_feature_matrix: torch.Tensor,
+        bond_feature_matrix: torch.Tensor,
         molecule_features_vector: torch.Tensor,
         target: torch.float32,
     ):
@@ -35,12 +36,14 @@ class SingleMolDatapoint(AbstractDatapoint):
         self.smiles = smiles
         self.adjacency_matrix = adjacency_matrix
         self.atom_feature_matrix = atom_feature_matrix
+        self.bond_feature_matrix = bond_feature_matrix
         self.molecule_features_vector = molecule_features_vector
         self.target = target
 
     def to(self, device) -> None:
         self.adjacency_matrix = self.adjacency_matrix.to(device)
         self.atom_feature_matrix = self.atom_feature_matrix.to(device)
+        self.bond_feature_matrix = self.bond_feature_matrix.to(device)
         self.molecule_features_vector = self.molecule_features_vector.to(device)
         # self.target.to(device)
 
@@ -56,6 +59,7 @@ class MultiMolDatapoint(AbstractDatapoint):
         smiles_list: list[str],
         adjacency_matrices: list[torch.Tensor],
         atom_feature_matrices: list[torch.Tensor],
+        bond_feature_matrices: list[torch.Tensor],
         molecule_feature_vectors: list[torch.Tensor],
         target: torch.float32,
     ):
@@ -63,6 +67,7 @@ class MultiMolDatapoint(AbstractDatapoint):
         self.smiles_list = smiles_list
         self.adjacency_matrices = adjacency_matrices
         self.atom_feature_matrices = atom_feature_matrices
+        self.bond_feature_matrices = bond_feature_matrices
         self.molecule_feature_vectors = molecule_feature_vectors
         self.target = target
 
@@ -78,6 +83,7 @@ class MultiMolDatapoint(AbstractDatapoint):
         for i in range(len(self.smiles_list)):
             self.adjacency_matrices[i] = self.adjacency_matrices[i].to(device)
             self.atom_feature_matrices[i] = self.atom_feature_matrices[i].to(device)
+            self.bond_feature_matrices[i] = self.bond_feature_matrices[i].to(device)
             self.molecule_feature_vectors[i] = self.molecule_feature_vectors[i].to(device)
         # self.target.to(device)
 

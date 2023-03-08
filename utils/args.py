@@ -48,10 +48,6 @@ class TrainArgs(Tap):
     shared_node_level_nns: bool = False
     """Whether node-level NNs should be shared across the depth of message passing or not."""
 
-    mol_features_only: bool = False
-    """Whether the model should use molecule features only. If true, the model will not use graph convolution and will
-       only feed molecule features through the readout fully connected NN."""
-
     graph_attention: bool = False
     """Whether to enable graph attention layer."""
 
@@ -131,6 +127,9 @@ class TrainArgs(Tap):
     optimizer: Literal["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"] = "sgd"
     """Which optimizer to use while training the model."""
 
+    co_attention_legacy: bool = False
+    """If passed, model uses co-attention with multi-molecule datapoints. Uses a legacy version of co-attention that simply adds connections between the nodes."""
+
     co_attention: bool = False
     """If passed, model uses co-attention with multi-molecule datapoints."""
 
@@ -194,5 +193,5 @@ class TrainArgs(Tap):
             self.model_save_name = f"gcnn_mol_trained_{str(datetime.now())}"
 
         # Raise error if user tries to use co-attention without using a multi-molecule dataset
-        if self.number_of_molecules == 1 and self.co_attention:
+        if self.number_of_molecules == 1 and self.co_attention_legacy:
             raise ValueError("Co-attention can only be used with datasets with multi-molecule datapoints.")

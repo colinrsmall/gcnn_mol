@@ -67,27 +67,20 @@ def train_model(train_args: TrainArgs):
     dataset.to(device)
 
     # Create paired datapoints for the dataset if using co-attention
-    if train_args.co_attention:
+    if train_args.co_attention_legacy:
         dataset.create_paired_datapoints()
 
     # Split data in to training and test set
     train_set, test_set = dataset.train_test_split(0.2)
 
-    # Build model to use
-    if train_args.mol_features_only:
-        m = gcnn.FCNNOnly(
-            train_args,
-            dataset.mol_features_vector_length,
-            train_args.number_of_molecules,
-        ).to(device)
-    else:
-        m = gcnn.GCNN(
-            train_args,
-            dataset.atom_features_vector_length,
-            train_args.number_of_molecules,
-            dataset.mol_features_vector_length,
-            device,
-        ).to(device)
+    # Build model
+    m = gcnn.GCNN(
+        train_args,
+        dataset.atom_features_vector_length,
+        train_args.number_of_molecules,
+        dataset.mol_features_vector_length,
+        device,
+    ).to(device)
 
     # Initiate model optimizer
     match train_args.optimizer:
