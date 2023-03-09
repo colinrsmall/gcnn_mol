@@ -35,16 +35,13 @@ class GCNN(nn.Module):
                 case x:
                     raise ValueError(f"Graph attention activation {x} not implemented.")
 
-        # Build input layer
+        # Build input atom layer
         self.input_node_level_atom_nn = nn.Linear(
             atom_feature_vector_length, train_args.hidden_size, train_args.bias, device=device
         )
 
-        # 21 is the size of the one-hot encoded bond feature vector
-        self.input_node_level_bond_nn = nn.Linear(21, train_args.hidden_size, train_args.bias, device=device)
-
         # Build node-level atom-feature NNs
-        if train_args.shared_node_level_nns:
+        if train_args.shared_node_level_atom_nns:
             self.node_level_atom_nn = nn.Linear(
                 train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device
             )
@@ -56,16 +53,9 @@ class GCNN(nn.Module):
                 )
 
         # Build node-level bond-feature NNs
-        if train_args.shared_node_level_nns:
-            self.node_level_bond_nn = nn.Linear(
-                train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device
-            )
-        else:  # separate node-level bond-feature NNs per depth level
-            self.node_level_bond_nns = []
-            for depth in range(train_args.depth):
-                self.node_level_bond_nns.append(
-                    nn.Linear(train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device)
-                )
+        # This NN is used for both input and update
+        # 21 is the size of the rdkit BondType enum (i.e. the size of the bond feature input vector)
+        self.node_level_bond_nn = nn.Linear(21, 1, train_args.bias, device=device)
 
         # Build LAF aggregation layer if using
         if train_args.aggregation_method == "LAF":
@@ -114,7 +104,30 @@ class GCNN(nn.Module):
                 raise ValueError(f"{self.activation} not implemented.")
 
     def forward(self, datapoint: Union[SingleMolDatapoint, MultiMolDatapoint]):
-        def forward_helper(adjacency_matrix: Tensor, atom_feature_matrix: Tensor, mol_features: Tensor) -> Tensor:
+        def update(lr_helper: Tensor, depth: int):
+            """
+            Helper function for processing the update step of the GNN.
+            :param lr_helper:
+            :return:
+            """
+            # Pass lr helper through node level NNs
+            if self.train_args.shared_node_level_atom_nns:
+                lr_helper = self.node_level_atom_nn(lr_helper)
+            else:  # separate node-level NNs per depth level
+                lr_helper = self.node_level_atom_nns[depth](lr_helper)
+
+            # Activation
+            lr_helper = self.activation_function(lr_helper)
+
+            # Dropout
+            if self.train_args.node_level_dropout and not self.train_args.update_before_aggregation:
+                lr_helper = self.dropout(lr_helper)
+
+            return lr_helper
+
+        def forward_helper(
+            adjacency_matrix: Tensor, atom_feature_matrix: Tensor, bond_feature_matrix: Tensor, mol_features: Tensor
+        ) -> Tensor:
             """
             Helper function for a forward pass of the NN.
             :param mol_features:
@@ -124,12 +137,18 @@ class GCNN(nn.Module):
             """
 
             # Input
-            # lr_helper = latent representation of helper function
             lr_helper = self.input_node_level_atom_nn(atom_feature_matrix)
             lr_helper = self.activation_function(lr_helper)
 
             # Message passing
             for depth in range(self.train_args.depth):
+                # Create bond weights if desired
+                if self.train_args.bond_weighting:
+                    bond_weights = self.node_level_bond_nn(bond_feature_matrix)
+                    bond_weights = self.attention_activation(bond_weights).reshape(
+                        adjacency_matrix.shape[0], adjacency_matrix.shape[0]
+                    )
+
                 # Graph attention
                 if self.train_args.graph_attention:
                     # Creates centroid-neighbor atom pair feature tensors
@@ -150,17 +169,13 @@ class GCNN(nn.Module):
                 else:
                     attentive_adjacency_matrix = adjacency_matrix
 
+                # Scale adjacency matrix if using bond weights
+                if self.train_args.bond_weighting:
+                    attentive_adjacency_matrix = attentive_adjacency_matrix * bond_weights
+
                 # Update before aggregation if desired
                 if self.train_args.update_before_aggregation:
-                    if self.train_args.shared_node_level_nns:
-                        lr_helper = self.node_level_atom_nn(lr_helper)
-                    else:  # separate node-level NNs per depth level
-                        lr_helper = self.node_level_atom_nns[depth](lr_helper)
-                    # Activation
-                    lr_helper = self.activation_function(lr_helper)
-                    # Dropout
-                    if self.train_args.node_level_dropout:
-                        lr_helper = self.dropout(lr_helper)
+                    update(lr_helper, depth)
 
                 # Aggregation
                 match self.train_args.aggregation_method:
@@ -186,15 +201,9 @@ class GCNN(nn.Module):
 
                 # Update after aggregation by default
                 if not self.train_args.update_before_aggregation:
-                    if self.train_args.shared_node_level_nns:
-                        lr_helper = self.node_level_atom_nn(lr_helper)
-                    else:  # separate node-level NNs per depth level
-                        lr_helper = self.node_level_atom_nns[depth](lr_helper)
-                    # Activation
-                    lr_helper = self.activation_function(lr_helper)
-                    # Dropout
-                    if self.train_args.node_level_dropout:
-                        lr_helper = self.dropout(lr_helper)
+                    update(lr_helper, depth)
+                else:  # Else run dropoout because lr has already been updated pre-aggregation
+                    lr_helper = self.dropout(lr_helper)
 
             # Readout aggregation
             match self.train_args.aggregation_method:
@@ -215,7 +224,10 @@ class GCNN(nn.Module):
         # Use helper function to perform message passing step(s)
         if self.number_of_molecules == 1:
             latent_representation = forward_helper(
-                datapoint.adjacency_matrix, datapoint.atom_feature_matrix, datapoint.molecule_features_vector
+                datapoint.adjacency_matrix,
+                datapoint.atom_feature_matrix,
+                datapoint.bond_feature_matrix,
+                datapoint.molecule_features_vector,
             )
         else:
             latent_representations = []
@@ -223,6 +235,7 @@ class GCNN(nn.Module):
                 lr = forward_helper(
                     datapoint.adjacency_matrices[i],
                     datapoint.atom_feature_matrices[i],
+                    datapoint.bond_feature_matrices[i],
                     datapoint.molecule_feature_vectors[i],
                 )
                 latent_representations.append(lr)
