@@ -45,7 +45,7 @@ class TrainArgs(Tap):
     aggregation_method: Literal["mean", "sum", "LAF"] = "sum"
     """Aggregation method during graph convolution."""
 
-    shared_node_level_atom_nns: bool = False
+    shared_node_level_nns: bool = False
     """Whether node-level atom NNs should be shared across the depth of message passing or not."""
 
     bond_weighting: bool = False

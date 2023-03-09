@@ -41,7 +41,7 @@ class GCNN(nn.Module):
         )
 
         # Build node-level atom-feature NNs
-        if train_args.shared_node_level_atom_nns:
+        if train_args.shared_node_level_nns:
             self.node_level_atom_nn = nn.Linear(
                 train_args.hidden_size, train_args.hidden_size, train_args.bias, device=device
             )
@@ -111,7 +111,7 @@ class GCNN(nn.Module):
             :return:
             """
             # Pass lr helper through node level NNs
-            if self.train_args.shared_node_level_atom_nns:
+            if self.train_args.shared_node_level_nns:
                 lr_helper = self.node_level_atom_nn(lr_helper)
             else:  # separate node-level NNs per depth level
                 lr_helper = self.node_level_atom_nns[depth](lr_helper)

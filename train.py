@@ -32,7 +32,7 @@ def train_model(train_args: TrainArgs):
             "readout_dropout": train_args.readout_dropout,
             "dropout_prob": train_args.dropout_probability,
             "aggregation_method": train_args.aggregation_method,
-            "shared+node_level_nns": train_args.shared_node_level_atom_nns,
+            "shared+node_level_nns": train_args.shared_node_level_nns,
             "explicit_hydrogens": train_args.explicit_hydrogens,
             "atom_descriptors": train_args.atom_descriptors,
             "molecule_descriptors": train_args.molecule_descriptors,
