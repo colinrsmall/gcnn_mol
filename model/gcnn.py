@@ -171,7 +171,7 @@ class GCNN(nn.Module):
 
                 # Scale adjacency matrix if using bond weights
                 if self.train_args.bond_weighting:
-                    attentive_adjacency_matrix = attentive_adjacency_matrix * bond_weights
+                    attentive_adjacency_matrix = attentive_adjacency_matrix + bond_weights
 
                 # Update before aggregation if desired
                 if self.train_args.update_before_aggregation:
