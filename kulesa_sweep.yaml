@@ -14,7 +14,7 @@ parameters:
   depth:
     values: [5, 6, 7]
   shared_node_level_nns:
-    values: True
+    value: True
   activation_function:
     value: "leakyReLU"
   learning_rate:
