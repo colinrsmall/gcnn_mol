@@ -133,11 +133,8 @@ class TrainArgs(Tap):
     optimizer: Literal["adam", "sgd", "adagrad", "adadelta", "sgd_nesterov", "adamw"] = "sgd"
     """Which optimizer to use while training the model."""
 
-    co_attention_legacy: bool = False
-    """If passed, model uses co-attention with multi-molecule datapoints. Uses a legacy version of co-attention that simply adds connections between the nodes."""
-
-    co_attention: bool = False
-    """If passed, model uses co-attention with multi-molecule datapoints."""
+    co_attention_factor: float = 0
+    """Sets the co-attention scale for multi-molecule datapoints. If zero, the model will not use co-attention."""
 
     update_before_aggregation: bool = False
     """If passed, the feature vectors/latent representations of the molecules are updated before aggregation."""
@@ -199,5 +196,8 @@ class TrainArgs(Tap):
             self.model_save_name = f"gcnn_mol_trained_{str(datetime.now())}"
 
         # Raise error if user tries to use co-attention without using a multi-molecule dataset
-        if self.number_of_molecules == 1 and self.co_attention_legacy:
+        if self.number_of_molecules == 1 and self.co_attention_factor:
             raise ValueError("Co-attention can only be used with datasets with multi-molecule datapoints.")
+
+        if self.bond_weighting and self.co_attention_factor:
+            raise ValueError("Bond weighting and co-attention cannot currently be used at the same time.")

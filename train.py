@@ -66,8 +66,8 @@ def train_model(train_args: TrainArgs):
     dataset.to(device)
 
     # Create paired datapoints for the dataset if using co-attention
-    if train_args.co_attention_legacy:
-        dataset.create_paired_datapoints()
+    if train_args.co_attention_factor:
+        dataset.create_paired_datapoints(train_args.co_attention_factor)
 
     # Split data in to training and test set
     train_set, test_set = dataset.train_test_split(0.2)
