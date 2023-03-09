@@ -51,6 +51,9 @@ class TrainArgs(Tap):
     bond_weighting: bool = False
     """If passed, bond types are used to weight neighboring atoms during aggregation."""
 
+    attention_uses_atom_features: bool = False
+    """If passed, the attention mechanism uses only the atom features as input, not the current latent represenation."""
+
     graph_attention: bool = False
     """Whether to enable graph attention layer."""
 

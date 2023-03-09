@@ -14,7 +14,7 @@ parameters:
   depth:
     value: 5
   shared_node_level_nns:
-    values: [True, False]
+    value: True
   activation_function:
     value: "leakyReLU"
   learning_rate:
@@ -52,6 +52,8 @@ parameters:
   optimizer:
     value: "adagrad"
   update_before_aggregation:
+    values: [True, False]
+  bond_weighting:
     values: [True, False]
 
 command:
