@@ -25,7 +25,7 @@ class GCNN(nn.Module):
         self.number_of_molecules = number_of_molecules
 
         # Build graph attention mechanism
-        if train_args.graph_attention:
+        if train_args.graph_attention or train_args.bond_weighting:
             self.graph_attention = nn.Linear(train_args.hidden_size * 2, 1, train_args.bias, device=device)
             match train_args.graph_attention_activation:
                 case "softmax":
