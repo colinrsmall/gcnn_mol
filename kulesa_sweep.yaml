@@ -12,7 +12,7 @@ parameters:
   hidden_size:
     value: 1280
   depth:
-    values: [5, 6, 7]
+    value: 6
   shared_node_level_nns:
     value: True
   activation_function:
@@ -55,8 +55,8 @@ parameters:
     values: [True, False]
   update_before_aggregation:
     values: [True, False]
-  bond_weighting:
-    values: [True, False]
+  co_attention_factor:
+    values: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
 
 command:
