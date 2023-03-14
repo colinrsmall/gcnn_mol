@@ -65,9 +65,10 @@ def train_model(train_args: TrainArgs):
     # Move dateset to detected device
     dataset.to(device)
 
-    # Create paired datapoints for the dataset if using co-attention
-    if train_args.co_attention_factor:
-        dataset.create_paired_datapoints(train_args.co_attention_factor)
+    # # Create paired datapoints for the dataset if using co-attention
+    # Note: Disabled here because of memory limitations
+    # if train_args.co_attention_factor:
+    #     dataset.create_paired_datapoints(train_args.co_attention_factor)
 
     # Split data in to training and test set
     train_set, test_set = dataset.train_test_split(0.2)
@@ -142,6 +143,10 @@ def train_model(train_args: TrainArgs):
 
         # Train model on training set
         for i, datapoint in tqdm(enumerate(train_set), desc="Train set:", leave=False, total=len(train_set)):
+            # Create paiured datapoint if using co-attention
+            if train_args.co_attention_factor:
+                datapoint.create_paired_datapoints(train_args.co_attention_factor)
+
             # zero the parameter gradients
             optimizer.zero_grad()
 
