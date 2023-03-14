@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from typing import Literal
 
 from tap import Tap
@@ -172,7 +172,7 @@ class TrainArgs(Tap):
                 if descriptor not in atom_descriptors.all_descriptors():
                     raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
         else:
-            self.atom_descriptors = atom_descriptors.all_descriptors().keys()
+            self.atom_descriptors = list(atom_descriptors.all_descriptors().keys())
 
         # Ensure chosen molecule descriptors are valid, or load all descriptors if using all
         if self.molecule_descriptors != ["all"]:
@@ -180,7 +180,7 @@ class TrainArgs(Tap):
                 if descriptor not in molecule_descriptors.all_descriptors():
                     raise ValueError(f"{descriptor} is not a valid atom descriptor. Please check for typos.")
         else:
-            self.molecule_descriptors = molecule_descriptors.all_descriptors().keys()
+            self.molecule_descriptors = list(molecule_descriptors.all_descriptors().keys())
 
         # Ensure chosen metrics are valid
         if self.metrics == ["all"]:  # Workaround for wandb hyperparameter sweep
@@ -193,7 +193,7 @@ class TrainArgs(Tap):
 
         # Set model save name to the current datetime stamp if no model name is provided
         if self.model_save_name is None:
-            self.model_save_name = f"gcnn_mol_trained_{str(datetime.now())}"
+            self.model_save_name = f"gcnn_mol_trained.pt"
 
         # Raise error if user tries to use co-attention without using a multi-molecule dataset
         if self.number_of_molecules == 1 and self.co_attention_factor:

@@ -20,18 +20,22 @@ def save_checkpoint(
     :param train_args: The training arguments the model was built and trained with.
     """
     # Create directories to save path if they do not exist
-    save_path = os.path.join(train_args.model_save_path, train_args.model_save_name)
-    os.makedirs(save_path)
+    save_path = os.path.abspath(train_args.model_save_path)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    save_path = os.path.join(save_path, train_args.model_save_name)
 
     # Taken from: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
     git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode("ascii").strip()
 
-    checkpoint_state = {
-        "train_args": train_args,
-        "state_dict": model.state_dict(),
-        "atom_features_scalers": atom_features_scalers,
-        "git_hash": git_hash,  # Saved for debugging, later use if needed
-    }
+    checkpoint_state = list(
+        {
+            "train_args": train_args,
+            "state_dict": model.state_dict(),
+            "atom_features_scalers": atom_features_scalers,
+            "git_hash": git_hash,  # Saved for debugging, later use if needed
+        }
+    )
     torch.save(checkpoint_state, save_path)
 
 

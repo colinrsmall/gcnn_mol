@@ -70,6 +70,7 @@ class MultiMolDatapoint(AbstractDatapoint):
         self.bond_feature_matrices = bond_feature_matrices
         self.molecule_feature_vectors = molecule_feature_vectors
         self.target = target
+        self.co_attention = False
 
     def __getitem__(self, idx):
         return (
@@ -112,3 +113,4 @@ class MultiMolDatapoint(AbstractDatapoint):
 
         self.adjacency_matrices = [mol_1_padded_adjacency, mol_2_padded_adjacency]
         self.atom_feature_matrices = [mol_1_padded_atom_features, mol_2_padded_atom_features]
+        self.co_attention = True

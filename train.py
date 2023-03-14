@@ -144,7 +144,7 @@ def train_model(train_args: TrainArgs):
         # Train model on training set
         for i, datapoint in tqdm(enumerate(train_set), desc="Train set:", leave=False, total=len(train_set)):
             # Create paiured datapoint if using co-attention
-            if train_args.co_attention_factor:
+            if train_args.co_attention_factor and not datapoint.co_attention:
                 datapoint.create_paired_datapoints(train_args.co_attention_factor)
 
             # zero the parameter gradients
