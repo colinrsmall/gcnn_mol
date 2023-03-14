@@ -51,8 +51,6 @@ parameters:
     value: "mae"
   optimizer:
     value: "adadelta"
-  co_attention:
-    values: [True, False]
   update_before_aggregation:
     values: [True, False]
   co_attention_factor:
