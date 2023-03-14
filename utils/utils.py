@@ -26,14 +26,14 @@ def save_checkpoint(
     save_path = os.path.join(save_path, train_args.model_save_name)
 
     # Taken from: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
-    git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode("ascii").strip()
+    # git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode("ascii").strip()
 
     checkpoint_state = list(
         {
             "train_args": train_args,
             "state_dict": model.state_dict(),
             "atom_features_scalers": atom_features_scalers,
-            "git_hash": git_hash,  # Saved for debugging, later use if needed
+            # "git_hash": git_hash,  # Saved for debugging, later use if needed
         }
     )
     torch.save(checkpoint_state, save_path)
