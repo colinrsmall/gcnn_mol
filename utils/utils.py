@@ -28,14 +28,7 @@ def save_checkpoint(
     # Taken from: https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
     # git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode("ascii").strip()
 
-    checkpoint_state = list(
-        {
-            "train_args": train_args,
-            "state_dict": model.state_dict(),
-            "atom_features_scalers": atom_features_scalers,
-            # "git_hash": git_hash,  # Saved for debugging, later use if needed
-        }
-    )
+    checkpoint_state = [train_args, model.state_dict(), atom_features_scalers]
     torch.save(checkpoint_state, save_path)
 
 
@@ -52,9 +45,9 @@ def load_checkpoint(load_path: str) -> (dict, list[StandardScaler], args.TrainAr
         raise ValueError(f"Model at {load_path} does not exist.")
 
     state = torch.load(load_path)
-    train_args = state["train_args"]
-    state_dict = state["state_dict"]
-    atom_features_scalers = state["atom_features_scalers"]
+    train_args = state[0]
+    state_dict = state[1]
+    atom_features_scalers = state[2]
 
     return state_dict, atom_features_scalers, train_args
 
