@@ -15,10 +15,12 @@ import wandb
 import yaml
 
 
-def train_model(load_path: str, dataset_path: str, output_path: str):
+def train_model(load_path: str, dataset_path: str, output_path: str, col_a: str, col_b: str):
     # Load saved model
     state_dict, atom_features_scalers, train_args = utils.load_checkpoint(load_path)
     train_args.dataset_path = dataset_path
+    train_args.molecule_smiles_columns = [col_a, col_b]
+    train_args.target_column = None
 
     # Set pytorch seed
     if train_args.seed:
@@ -64,4 +66,4 @@ def train_model(load_path: str, dataset_path: str, output_path: str):
                 file_writer.writerow([datapoint.smiles, output])
 
 
-train_model(sys.argv[1], sys.argv[2], sys.argv[3])
+train_model(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])

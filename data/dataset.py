@@ -132,7 +132,7 @@ def load_dataset(train_args: TrainArgs) -> Dataset:
             dp = featurizer.featurize_datapoint(
                 row[train_args.molecule_smiles_columns],
                 train_args.number_of_molecules,
-                row[train_args.target_column],
+                row[train_args.target_column] if train_args.target_column else None,
             )
             datapoints.extend([dp])
         except TypeError:  # dp returned None, a SMILES string could not be parsed
