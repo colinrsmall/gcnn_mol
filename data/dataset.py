@@ -30,6 +30,7 @@ class Dataset(data.Dataset):
         datapoints: list[Union[SingleMolDatapoint, MultiMolDatapoint]],
         features_to_normalize: list[bool],
         num_molecules_per_datapoint: int,
+        for_prediction: bool = False,
     ):
         self.data_args = train_args
         self.datapoints = datapoints
@@ -44,14 +45,15 @@ class Dataset(data.Dataset):
         self.mol_features_vector_length = len(featurizer.create_descriptors_for_molecule(mol))
 
         # For LDS, find the minimum target and the scaling factor such that target domain becomes [0, num_buckets)
-        # 1. Set lower bound of targets to 1 by adding the minimum target to all targets if minimum target is less than 0
-        targets = [dp.target for dp in self.datapoints]
-        self.min_target = min(targets)
-        if self.min_target < 0:
-            targets = [t - self.min_target for t in targets]
-        # Scale each target such that the maximum target = max bucket number = num_buckets
-        max_target = max(targets)
-        self.scale_factor = (train_args.lds_num_buckets - 1) / max_target
+        if not for_prediction:
+            # 1. Set lower bound of targets to 1 by adding the minimum target to all targets if minimum target is less than 0
+            targets = [dp.target for dp in self.datapoints]
+            self.min_target = min(targets)
+            if self.min_target < 0:
+                targets = [t - self.min_target for t in targets]
+            # Scale each target such that the maximum target = max bucket number = num_buckets
+            max_target = max(targets)
+            self.scale_factor = (train_args.lds_num_buckets - 1) / max_target
 
     def fit_scalers_to_features(self) -> list[StandardScaler]:
         """
@@ -158,7 +160,7 @@ class Dataset(data.Dataset):
         self.eff_label_dist = convolve1d(np.array(emp_label_dist), weights=lds_kernel_window, mode="constant")
 
 
-def load_dataset(train_args: TrainArgs) -> Dataset:
+def load_dataset(train_args: TrainArgs, for_prediction: bool = False) -> Dataset:
     featurizer = MoleculeFeaturizer(train_args)
     data = pd.read_csv(train_args.dataset_path)
 
@@ -184,4 +186,5 @@ def load_dataset(train_args: TrainArgs) -> Dataset:
         datapoints,
         get_features_to_normalize(train_args.atom_descriptors),
         train_args.number_of_molecules,
+        for_prediction,
     )

@@ -33,7 +33,7 @@ def train_model(load_path: str, dataset_path: str, output_path: str, col_a: str,
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load data according to train_args settings
-    dataset = load_dataset(train_args)
+    dataset = load_dataset(train_args, for_prediction=True )
 
     # Scale dataset features
     dataset.normalize_features(atom_features_scalers)
