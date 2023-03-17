@@ -48,7 +48,7 @@ class Dataset(data.Dataset):
         targets = [dp.target for dp in self.datapoints]
         self.min_target = min(targets)
         if self.min_target < 0:
-            targets = [t + self.min_target for t in targets]
+            targets = [t - self.min_target for t in targets]
         # Scale each target such that the maximum target = max bucket number = num_buckets
         max_target = max(targets)
         self.scale_factor = (train_args.lds_num_buckets - 1) / max_target
