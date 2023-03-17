@@ -162,7 +162,7 @@ def train_model(train_args: TrainArgs):
             # Get LDS weight for target
             target_bin = dataset.get_bin_idx(datapoint.target)
             weight = np.float32(1 / dataset.eff_label_dist[target_bin])
-            loss = loss_function(output, torch.Tensor([datapoint.target]) * weight).to(device)
+            loss = loss_function(output, torch.Tensor([datapoint.target], device=device) * weight)
             running_loss = loss.item()
             loss.backward()
             nn.utils.clip_grad_norm_(m.parameters(), train_args.gradient_clipping_norm)
