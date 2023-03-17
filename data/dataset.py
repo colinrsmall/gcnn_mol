@@ -15,6 +15,12 @@ from data.moldata import AbstractDatapoint, MultiMolDatapoint, SingleMolDatapoin
 
 from rdkit.Chem import rdPartialCharges
 
+from collections import Counter
+from scipy.ndimage import convolve1d
+from utils.utils import get_lds_kernel_window
+
+import numpy as np
+
 
 class Dataset(data.Dataset):
     # TODO: Inherit from nn.Dataset (https://pytorch.org/tutorials/beginner/data_loading_tutorial.html)
@@ -36,6 +42,16 @@ class Dataset(data.Dataset):
         rdPartialCharges.ComputeGasteigerCharges(mol)
         self.atom_features_vector_length = len(featurizer.create_descriptors_for_atom(mol.GetAtoms()[0]))
         self.mol_features_vector_length = len(featurizer.create_descriptors_for_molecule(mol))
+
+        # For LDS, find the minimum target and the scaling factor such that target domain becomes [0, num_buckets)
+        # 1. Set lower bound of targets to 1 by adding the minimum target to all targets if minimum target is less than 0
+        targets = [dp.target for dp in self.datapoints]
+        self.min_target = min(targets)
+        if self.min_target < 0:
+            targets = [t + self.min_target for t in targets]
+        # Scale each target such that the maximum target = max bucket number = num_buckets
+        max_target = max(targets)
+        self.scale_factor = (train_args.lds_num_buckets - 1) / max_target
 
     def fit_scalers_to_features(self) -> list[StandardScaler]:
         """
@@ -117,6 +133,29 @@ class Dataset(data.Dataset):
         else:
             train_set, test_set = train_test_split(self.datapoints, test_size=test_split_percentage)
         return train_set, test_set
+
+    def get_bin_idx(self, target: float) -> int:
+        """
+        Gets the bin index for a given target when all targets in the dataset are scaled to
+        :param target: The target of a datapoint in the dataset.
+        :return: The bin index of the target.
+        """
+        return int((target + -1 * self.min_target) * self.scale_factor)
+
+    def create_lds_weights(self, kernel="gaussian", ks=5, sigma=2):
+        """
+        Creates a set of weights for each target in the dataset using LDS. See https://github.com/YyzHarry/imbalanced-regression
+        :return:
+        """
+        bin_index_per_label = [self.get_bin_idx(dp.target) for dp in self.datapoints]
+        Nb = max(bin_index_per_label) + 1
+        num_samples_of_bins = dict(Counter(bin_index_per_label))
+        emp_label_dist = [num_samples_of_bins.get(i, 0) for i in range(Nb)]
+
+        # lds_kernel_window: [ks,], here for example, we use gaussian, ks=5, sigma=2
+        lds_kernel_window = get_lds_kernel_window(kernel, ks, sigma)
+        # calculate effective label distribution: [Nb,]
+        self.eff_label_dist = convolve1d(np.array(emp_label_dist), weights=lds_kernel_window, mode="constant")
 
 
 def load_dataset(train_args: TrainArgs) -> Dataset:

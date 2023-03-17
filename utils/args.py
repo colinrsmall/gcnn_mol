@@ -139,6 +139,9 @@ class TrainArgs(Tap):
     update_before_aggregation: bool = False
     """If passed, the feature vectors/latent representations of the molecules are updated before aggregation."""
 
+    lds_num_buckets: int = 100
+    """Number of buckets to use when using LDS scaling."""
+
     def process_args(self) -> None:
         """
         Checks that argument choices are valid.

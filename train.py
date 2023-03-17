@@ -5,6 +5,7 @@ from torch import nn
 from tqdm.auto import tqdm
 from utils import metrics, utils
 
+import numpy as np
 import torch
 import torch.optim as optim
 
@@ -57,6 +58,9 @@ def train_model(train_args: TrainArgs):
 
     # Load data according to train_args settings
     dataset = load_dataset(train_args)
+
+    # Create LDS weights for the dataset
+    dataset.create_lds_weights()
 
     # Scale dataset features
     feature_scalers = dataset.fit_scalers_to_features()
@@ -155,7 +159,10 @@ def train_model(train_args: TrainArgs):
             training_outputs.append(output.detach().cpu().numpy())
 
             # Calculate loss, backprop, and update optimizer
-            loss = loss_function(output, torch.Tensor([datapoint.target]).to(device))
+            # Get LDS weight for target
+            target_bin = dataset.get_bin_idx(datapoint.target)
+            weight = np.float32(1 / dataset.eff_label_dist[target_bin])
+            loss = loss_function(output, torch.Tensor([datapoint.target]) * weight).to(device)
             running_loss = loss.item()
             loss.backward()
             nn.utils.clip_grad_norm_(m.parameters(), train_args.gradient_clipping_norm)
